@@ -31,8 +31,8 @@ class Fight:
     def attack_power(self,attacker,target): #use random with the possibly of missing an attack if attack<1
        attack=random.randint(1,10)
        if attack>1:  
-        multiplicator=get_type_multiplier(attacker.get_type,target.get_type) #call of type.py method and take type of both pokemon
-        total_damage=attacker.attack*multiplicator #take pokemon attack from pokemon.py 
+        multiplicator=get_type_multiplier(attacker.get_type()[0],target.get_type()) #call of type.py method and take type of both pokemon
+        total_damage=attacker.get_attack()*multiplicator #take pokemon attack from pokemon.py 
         target.take_damage(total_damage) #take pokemon.py method take_damage
        else:
         print("Oups! Attack missed")
