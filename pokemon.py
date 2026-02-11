@@ -1,14 +1,14 @@
 import pygame
 
-
+#Creation of pokemon class
 class Pokemon:
-    def __init__(self,pokemon_id,all_data):
-        file=all_data[str(pokemon_id)]
+    def __init__(self,pokemon_id,all_data): #Take pokemon id and data from pokemon.json
+        file=all_data[str(pokemon_id)]#Load all data from pokemon.json
         self.id=pokemon_id
         self.xp=0
         self.load_attributes(file)
 
-    def load_attributes(self,file):
+    def load_attributes(self,file): #Method to avoid repetition and have all pokemon data imported
         self.name=file["name"]
         self.type=file["type"]
         self.level=file["level"]
@@ -20,7 +20,7 @@ class Pokemon:
         self.evolution_level=file["evolution_level"]
         self.sprite=pygame.image.load(file["sprite"])
 
-    def __str__(self):
+    def __str__(self): #Method to debug in case of issues
         display=f"--Pokémon Data--\n"
         display+=f"Name: {self.name}(lv.{self.level}\n)"
         display+=f"Type: {"/".join(self.type)}\n"
@@ -31,21 +31,21 @@ class Pokemon:
         else:
             display+=f"This Pokemon is at his final stage of evolution\n"
 
-    def is_alive(self):
+    def is_alive(self): #Method that check if pokemon is alive or not
         if self.hp>0:
             return True
         return False
     
-    def evolve(self,new_data):
+    def evolve(self,new_data): #Method that evolve the pokemon by taking the evolution_id from pokemon.json
         if self.level>=self.evolution_level and self.evolution_id!=None:
             self.id=self.evolution_id
-            new_file=new_data[str(self.evolution_id)]
+            new_file=new_data[str(self.evolution_id)] #Change past pokemon data with new data from the evolved pokemon
             self.load_attributes(new_file)
             return True
         return False
     
-
-    def raise_xp_level(self,new_data):
+    
+    def raise_xp_level(self,new_data): #Raise xp and level after each fight won 
         self.xp+=10
         if self.xp>=100:
            self.level+=1
@@ -54,9 +54,9 @@ class Pokemon:
            self.hp_max+=5
            self.attack+=3
            self.defense+=3
-           self.evolve(new_data)
+           self.evolve(new_data) #Call evolve method 
     
-    def take_damage(self,damage):
+    def take_damage(self,damage): #Method that lower hp using the total damage 
         total_damage=max(0,damage-self.defense)
         self.hp-=total_damage
 
