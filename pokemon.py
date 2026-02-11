@@ -8,13 +8,18 @@ class Pokemon:
         self.xp=0
         self.load_attributes(file)
 
+    def get_type(self): #getters for type and attack
+        return self.__type
+    def get_attack(self):
+        return self.__attack
+
     def load_attributes(self,file): #Method to avoid repetition and have all pokemon data imported
         self.name=file["name"]
-        self.type=file["type"]
+        self.__type=file["type"]
         self.level=file["level"]
         self.hp=file["hp"]
         self.hp_max=file["hp"]
-        self.attack=file["attack"]
+        self.__attack=file["attack"]
         self.defense=file["defense"]
         self.evolution_id=file["evolution_id"]
         self.evolution_level=file["evolution_level"]
