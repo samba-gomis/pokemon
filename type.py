@@ -1,3 +1,5 @@
+#full dictionnary with the attacker type and the defenter type and their bonus
+
 TYPE_DAMAGE = {
     "Normal": {
         "Normal": 1, "Fire": 0.75, "Water": 0.75, "Electric": 0.75, "Grass": 0.75, 
@@ -107,3 +109,10 @@ TYPE_DAMAGE = {
         "Psychic": 0.75, "Bug": 0.75, "Rock": 0.75, "Ghost": 0.75, "Dragon": 2, 
         "Dark": 2, "Steel": 0.5, "Fairy": 0.75}
 }
+
+def damage_mutliplying(attacker_type,defender_type): #method to multiply the damage using the dictionnary
+      total_multiplicator=1 #default multiplicator
+      for t in defender_type:       
+         bonus=TYPE_DAMAGE.get(attacker_type,{}).get(t,1) #get the attacker type and the defender type, leave empty if not found and leave 1 by default
+         total_multiplicator*=bonus
+      return total_multiplicator #return final multiplicator
