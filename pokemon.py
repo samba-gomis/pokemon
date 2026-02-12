@@ -64,7 +64,3 @@ class Pokemon:
     def take_damage(self,damage): #Method that lower hp using the total damage 
         total_damage=max(0,damage-self.defense)
         self.hp-=total_damage
-
-    
-    
-    
