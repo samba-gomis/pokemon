@@ -7,7 +7,7 @@ class Fight:
     def __init__(self,pokemon, all_data):
         self.pokemon=pokemon #player pokemon
         random_id=random.choice(list(all_data.keys())) #charge random_id for random opponent
-        self.opponent=Pokemon(random_id,all_data) #create opponant 
+        self.opponent=pokemon(random_id,all_data) #create opponant 
     
     def check_victory(self): 
         if not self.opponent.is_alive():
@@ -50,9 +50,4 @@ class Fight:
           is_captured = self.catch_pokemon()
           self.save_to_pokedex(self.opponent,is_captured)
        else: #if lost leave the boucle
-          return
-          
-
-               
-           
-           
+          return 
