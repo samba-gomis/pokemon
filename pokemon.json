@@ -56,7 +56,7 @@
     "defense":83,
     "evolution_id":null,
     "evolution_level":null,
-    "sprite":"assets/images/venusaur.png"
+    "sprite":"assets/images/venusaur-mega.png"
     },
 
   "6":{
@@ -165,7 +165,7 @@
     "defense":50,
     "evolution_id":null,
     "evolution_level":null,
-    "sprite":"assets/images/butterfree.png"
+    "sprite":"assets/images/butterfree-f.png"
     },
 
     "16":{
@@ -250,7 +250,7 @@
     "defense":	35,
     "evolution_id":23,
     "evolution_level":20,
-    "sprite":"assets/images/rattata.png"
+    "sprite":"assets/images/rattata-f.png"
     },
     
     "23":{
@@ -262,7 +262,7 @@
     "defense":60,
     "evolution_id":null,
     "evolution_level":null,
-    "sprite":"assets/images/raticate.png"
+    "sprite":"assets/images/raticate-f.png"
     },
     
       
