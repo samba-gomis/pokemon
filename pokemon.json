@@ -25,38 +25,38 @@
 
   "3":{
     "name":"Bulbasaur",
-    "type":["Plant","Poison"],
+    "type":["Grass","Poison"],
     "level":1,
     "hp":45,
     "attack":49,
     "defense":49,
     "evolution_id":4,
     "evolution_level":16,
-    "sprite":"assets/images/Bulbasaur.png"
+    "sprite":"assets/images/bulbasaur.png"
     },
 
   "4":{
     "name":"Ivysaur",
-    "type":["Plant","Poison"],
+    "type":["Grass","Poison"],
     "level":1,
     "hp":60,
     "attack":62,
     "defense":63,
     "evolution_id":5,
     "evolution_level":32,
-    "sprite":"assets/images/Ivysaur.png"
+    "sprite":"assets/images/ivysaur.png"
     },
 
   "5":{
     "name":"Venusaur",
-    "type":["Plant","Poison"],
+    "type":["Grass","Poison"],
     "level":1,
     "hp":80,
     "attack":82,
     "defense":83,
     "evolution_id":null,
     "evolution_level":null,
-    "sprite":"assets/images/Venusaur.png"
+    "sprite":"assets/images/venusaur.png"
     },
 
   "6":{
@@ -68,7 +68,7 @@
     "defense":43,
     "evolution_id":7,
     "evolution_level":16,
-    "sprite":"assets/images/Charmander.png"
+    "sprite":"assets/images/charmander.png"
     },
 
     "7":{
@@ -78,33 +78,22 @@
     "hp":58,
     "attack":64,
     "defense":58,
-    "evolution_id":8,
+    "evolution_id":9,
     "evolution_level":36,
-    "sprite":"assets/images/Charmeleon.png"
+    "sprite":"assets/images/charmeleon.png"
     },
 
-     "8":{
-    "name":"Charizard",
-    "type":["Fire"],
-    "level":1,
-    "hp":78,
-    "attack":84,
-    "defense":78,
-    "evolution_id":null,
-    "evolution_level":null,
-    "sprite":"assets/images/Charizard.png"
-    },
-
+  
     "9":{
     "name":"Charizard",
-    "type":["Fire","Fly"],
+    "type":["Fire","Flying"],
     "level":1,
     "hp":78,
     "attack":84,
     "defense":78,
     "evolution_id":null,
     "evolution_level":null,
-    "sprite":"assets/images/Charizard.png"
+    "sprite":"assets/images/charizard.png"
     },
 
     "10":{
@@ -116,7 +105,7 @@
     "defense":65,
     "evolution_id":11,
     "evolution_level":16,
-    "sprite":"assets/images/Squirtle.png"
+    "sprite":"assets/images/squirtle.png"
     },
 
     "11":{
@@ -128,7 +117,7 @@
     "defense":80,
     "evolution_id":12,
     "evolution_level":36,
-    "sprite":"assets/images/Wartortle.png"
+    "sprite":"assets/images/wartortle.png"
     },
  
     "12":{
@@ -140,42 +129,334 @@
     "defense":100,
     "evolution_id":null,
     "evolution_level":null,
-    "sprite":"assets/images/Blastoise.png"
+    "sprite":"assets/images/blastoise.png"
     },
 
     "13":{
     "name":"Caterpie",
-    "type":["Insect"],
+    "type":["Bug"],
     "level":1,
     "hp":45,
     "attack":30,
     "defense":35,
     "evolution_id":14,
     "evolution_level":7,
-    "sprite":"assets/images/Caterpie.png"
+    "sprite":"assets/images/caterpie.png"
     },
       
     "14":{
     "name":"Metapod",
-    "type":["Insect"],
+    "type":["Bug"],
     "level":1,
     "hp":50,
     "attack":20,
     "defense":55,
     "evolution_id":15,
     "evolution_level":10,
-    "sprite":"assets/images/Metapod.png"
+    "sprite":"assets/images/metapod.png"
     },
 
     "15":{
     "name":"Butterfree",
-    "type":["Insect"],
+    "type":["Bug"],
     "level":1,
     "hp":60,
     "attack":45,
     "defense":50,
     "evolution_id":null,
     "evolution_level":null,
-    "sprite":"assets/images/Butterfree.png"
+    "sprite":"assets/images/butterfree.png"
+    },
+
+    "16":{
+    "name":"Weedle",
+    "type":["Bug","Poison"],
+    "level":1,
+    "hp":40,
+    "attack":35,
+    "defense":30,
+    "evolution_id":17,
+    "evolution_level":7,
+    "sprite":"assets/images/weedle.png"
+    },
+
+    "17":{
+    "name":"Kakuna",
+    "type":["Bug","Poison"],
+    "level":1,
+    "hp":45,
+    "attack":25,
+    "defense":50,
+    "evolution_id":18,
+    "evolution_level":10,
+    "sprite":"assets/images/kakuna.png"
+    },
+
+    "18":{
+    "name":"Beedrill",
+    "type":["Bug","Poison"],
+    "level":1,
+    "hp":65,
+    "attack":90,
+    "defense":40,
+    "evolution_id":null,
+    "evolution_level":null,
+    "sprite":"assets/images/beedrill.png"
+    },
+
+    "19":{
+    "name":"Pidgey",
+    "type":["Normal","Flying"],
+    "level":1,
+    "hp":40,
+    "attack":45,
+    "defense":40,
+    "evolution_id":20,
+    "evolution_level":18,
+    "sprite":"assets/images/pidgey.png"
+    },
+
+    "20":{
+    "name":"Pidgeotto",
+    "type":["Normal","Flying"],
+    "level":1,
+    "hp":	63,
+    "attack":	60,
+    "defense":	55,
+    "evolution_id":21,
+    "evolution_level":36,
+    "sprite":"assets/images/pidgeotto.png"
+    },
+
+    
+    "21":{
+    "name":"Pidgeot",
+    "type":["Normal","Flying"],
+    "level":1,
+    "hp":83,
+    "attack":80,
+    "defense":75,
+    "evolution_id":null,
+    "evolution_level":null,
+    "sprite":"assets/images/pidgeot.png"
+    },
+    
+    "22":{
+    "name":"Rattata",
+    "type":["Normal"],
+    "level":1,
+    "hp":	30,
+    "attack":	56,
+    "defense":	35,
+    "evolution_id":23,
+    "evolution_level":20,
+    "sprite":"assets/images/rattata.png"
+    },
+    
+    "23":{
+    "name":"Raticate",
+    "type":["Normal"],
+    "level":1,
+    "hp":55,
+    "attack":81,
+    "defense":60,
+    "evolution_id":null,
+    "evolution_level":null,
+    "sprite":"assets/images/raticate.png"
+    },
+    
+      
+    "24":{
+    "name":"Spearow",
+    "type":["Normal","Flying"],
+    "level":1,
+    "hp":40,
+    "attack":60,
+    "defense":30,
+    "evolution_id":25,
+    "evolution_level":20,
+    "sprite":"assets/images/spearow.png"
+    },
+
+    "25":{
+    "name":"Fearow",
+    "type":["Normal","Flying"],
+    "level":1,
+    "hp":65,
+    "attack":90,
+    "defense":65,
+    "evolution_id":null,
+    "evolution_level":null,
+    "sprite":"assets/images/fearow.png"
+    },
+   
+    
+    "26":{
+    "name":"Ekans",
+    "type":["Poison"],
+    "level":1,
+    "hp":35,
+    "attack":60,
+    "defense":44,
+    "evolution_id":27,
+    "evolution_level":22,
+    "sprite":"assets/images/ekans.png"
+    },
+
+     
+    "27":{
+    "name":"Arbok",
+    "type":["Poison"],
+    "level":1,
+    "hp":60,
+    "attack":95,
+    "defense":69,
+    "evolution_id":null,
+    "evolution_level":null,
+    "sprite":"assets/images/arbok.png"
+    },
+   
+     
+    "28":{
+    "name":"Sandshrew",
+    "type":["Ground"],
+    "level":1,
+    "hp":50,
+    "attack":75,
+    "defense":85,
+    "evolution_id":29,
+    "evolution_level":22,
+    "sprite":"assets/images/sandshrew.png"
+    },
+
+    "29":{
+    "name":"Sandslash",
+    "type":["Ground"],
+    "level":1,
+    "hp":75,
+    "attack":100,
+    "defense":110,
+    "evolution_id":null,
+    "evolution_level":null,
+    "sprite":"assets/images/sandslash.png"
+    },
+   
+    "30":{
+    "name":"Nidoran♀",
+    "type":["Poison"],
+    "level":1,
+    "hp":55,
+    "attack":47,
+    "defense":52,
+    "evolution_id":31,
+    "evolution_level":16,
+    "sprite":"assets/images/nidoran_f.png"
+    },
+
+    
+    "31":{
+    "name":"Nidorina",
+    "type":["Poison"],
+    "level":1,
+    "hp":70,
+    "attack":62,
+    "defense":67,
+    "evolution_id":null,
+    "evolution_level":null,
+    "sprite":"assets/images/nidorina.png"
+    },
+   
+    
+    "32":{
+    "name":"Nidoran♂",
+    "type":["Poison"],
+    "level":1,
+    "hp":46,
+    "attack":57,
+    "defense":40,
+    "evolution_id":33,
+    "evolution_level":16,
+    "sprite":"assets/images/nidoran_m.png"
+    },
+    
+    "33":{
+    "name":"Nidorino",
+    "type":["Poison"],
+    "level":1,
+    "hp":61,
+    "attack":72,
+    "defense":57,
+    "evolution_id":null,
+    "evolution_level":null,
+    "sprite":"assets/images/nidorino.png"
+    },
+    
+    "34":{
+    "name":"Clefairy",
+    "type":["Fairy"],
+    "level":1,
+    "hp":70,
+    "attack":45,
+    "defense":48,
+    "evolution_id":null,
+    "evolution_level":null,
+    "sprite":"assets/images/clefairy.png"
+    },
+
+    "35":{
+    "name":"Vulpix",
+    "type":["Fire"],
+    "level":1,
+    "hp":38,
+    "attack":41,
+    "defense":40,
+    "evolution_id":null,
+    "evolution_level":null,
+    "sprite":"assets/images/vulpix.png"
+    },
+
+    "36":{
+    "name":"Jigglypuff",
+    "type":["Normal","Fairy"],
+    "level":1,
+    "hp":115,
+    "attack":45,
+    "defense":20,
+    "evolution_id":null,
+    "evolution_level":null,
+    "sprite":"assets/images/jigglypuff.png"
     }
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+
+   
+
+
+   
+
+
+   
+
+
+
+   
+
+
+
+
+
+
+
+
+
+    	
 }   
