@@ -8,7 +8,7 @@
     "defense":40,
     "evolution_id":2,
     "evolution_level":30,
-    "sprite":"pikachu.png"
+    "sprite":"assets/images/pikachu.png"
  },
 
   "2":{
@@ -20,7 +20,7 @@
     "defense":55,
     "evolution_id":null,
     "evolution_level":null,
-    "sprite":"raichu.png"
+    "sprite":"assets/images/raichu.png"
     },
 
   "3":{
@@ -32,7 +32,7 @@
     "defense":49,
     "evolution_id":4,
     "evolution_level":16,
-    "sprite":"Bulbasaur.png"
+    "sprite":"assets/images/Bulbasaur.png"
     },
 
   "4":{
@@ -44,7 +44,7 @@
     "defense":63,
     "evolution_id":5,
     "evolution_level":32,
-    "sprite":"Ivysaur.png"
+    "sprite":"assets/images/Ivysaur.png"
     },
 
   "5":{
@@ -56,7 +56,7 @@
     "defense":83,
     "evolution_id":null,
     "evolution_level":null,
-    "sprite":"Venusaur.png"
+    "sprite":"assets/images/Venusaur.png"
     },
 
   "6":{
@@ -68,7 +68,7 @@
     "defense":43,
     "evolution_id":7,
     "evolution_level":16,
-    "sprite":"Charmander.png"
+    "sprite":"assets/images/Charmander.png"
     },
 
     "7":{
@@ -80,7 +80,7 @@
     "defense":58,
     "evolution_id":8,
     "evolution_level":36,
-    "sprite":"Charmeleon.png"
+    "sprite":"assets/images/Charmeleon.png"
     },
 
      "8":{
@@ -92,7 +92,7 @@
     "defense":78,
     "evolution_id":null,
     "evolution_level":null,
-    "sprite":"Charizard.png"
+    "sprite":"assets/images/Charizard.png"
     },
 
     "9":{
@@ -104,7 +104,7 @@
     "defense":78,
     "evolution_id":null,
     "evolution_level":null,
-    "sprite":"Charizard.png"
+    "sprite":"assets/images/Charizard.png"
     },
 
     "10":{
@@ -116,7 +116,7 @@
     "defense":65,
     "evolution_id":11,
     "evolution_level":16,
-    "sprite":"Squirtle.png"
+    "sprite":"assets/images/Squirtle.png"
     },
 
     "11":{
@@ -128,7 +128,7 @@
     "defense":80,
     "evolution_id":12,
     "evolution_level":36,
-    "sprite":"Wartortle.png"
+    "sprite":"assets/images/Wartortle.png"
     },
  
     "12":{
@@ -140,7 +140,7 @@
     "defense":100,
     "evolution_id":null,
     "evolution_level":null,
-    "sprite":"Blastoise.png"
+    "sprite":"assets/images/Blastoise.png"
     },
 
     "13":{
@@ -152,7 +152,7 @@
     "defense":35,
     "evolution_id":14,
     "evolution_level":7,
-    "sprite":"Caterpie.png"
+    "sprite":"assets/images/Caterpie.png"
     },
       
     "14":{
@@ -164,7 +164,7 @@
     "defense":55,
     "evolution_id":15,
     "evolution_level":10,
-    "sprite":"Metapod.png"
+    "sprite":"assets/images/Metapod.png"
     },
 
     "15":{
@@ -176,6 +176,6 @@
     "defense":50,
     "evolution_id":null,
     "evolution_level":null,
-    "sprite":"Butterfree.png"
+    "sprite":"assets/images/Butterfree.png"
     }
 }   
