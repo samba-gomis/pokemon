@@ -1,8 +1,9 @@
 import pygame
 import pygame_textinput
 from Game import Game
-from Type import Type
+from type import *
 from constants import *
+from menu import Menu
 
 # Initialize Pygame
 pygame.init()
@@ -10,9 +11,9 @@ pygame.init()
 class GraphicalInterface:
     def __init__(self):
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        pygame.display.set_caption("🎮 Pokemon Game 🎮")
+        pygame.display.set_caption("Pokemon Game")
         self.clock = pygame.time.Clock()
-        self.game = Game()
+        #self.game = Game()
         self.state = "main_menu"
         self.selected_pokemon_index = -1
         self.battle_history = []
@@ -29,6 +30,7 @@ class GraphicalInterface:
             "attack": "",
             "defense": ""
         }
+        self.menu = Menu(self.screen, self.draw_text, self.draw_button)
         self.run()
 
     def draw_text(self, text, font, color, x, y, center=False):
@@ -80,37 +82,28 @@ class GraphicalInterface:
                     self.current_input_field = None
                     self.text_input = pygame_textinput.TextInputVisualizer(font_object=FONT_NORMAL)
 
-    def main_menu(self):
-        self.screen.fill(BG_COLOR)
-        self.draw_text("🎮 POKEMON GAME 🎮", FONT_TITLE, TEXT_COLOR, WIDTH//2, 50, center=True)
-        self.draw_text("Catch them all!", FONT_NORMAL, (149, 165, 166), WIDTH//2, 100, center=True)
-        self.draw_button("⚔️ Start Game", WIDTH//2 - 125, 200, 250, 50, BUTTON_GREEN, lambda: self.set_state("pokemon_selection"))
-        self.draw_button("➕ Add Pokemon", WIDTH//2 - 125, 270, 250, 50, BUTTON_BLUE, lambda: self.set_state("add_pokemon"))
-        self.draw_button("📖 View Pokedex", WIDTH//2 - 125, 340, 250, 50, BUTTON_ORANGE, lambda: self.set_state("pokedex"))
-        self.draw_button("🚪 Quit", WIDTH//2 - 125, 410, 250, 50, BUTTON_RED, lambda: pygame.quit())
-
     def pokemon_selection(self):
         self.screen.fill(BG_COLOR)
         self.draw_text("Choose Your Pokemon", FONT_TITLE, TEXT_COLOR, WIDTH//2, 50, center=True)
-        pokemons = self.game.obtenir_liste_pokemons()
+        pokemons = self.game.get_pokemon_list()
         items = []
         for i, pokemon in enumerate(pokemons):
-            types_str = "/".join([t.nom for t in pokemon.types])
-            text = f"{i+1}. {pokemon.nom} ({types_str}) - Lv.{pokemon.niveau} - ATK:{pokemon.attaque} DEF:{pokemon.defense}"
+            types_str = "/".join([t.name for t in pokemon.types])
+            text = f"{i+1}. {pokemon.name} ({types_str}) - Lv.{pokemon.level} - ATK:{pokemon.attack} DEF:{pokemon.defense}"
             items.append(text)
         self.draw_listbox(items, 50, 100, 800, 400, self.selected_pokemon_index)
-        self.draw_button("✅ Confirm", WIDTH//2 - 100, 550, 150, 50, BUTTON_GREEN, self.confirm_pokemon_selection)
-        self.draw_button("🔙 Back", WIDTH//2 + 60, 550, 150, 50, BUTTON_GRAY, lambda: self.set_state("main_menu"))
+        self.draw_button(" Confirm", WIDTH//2 - 100, 550, 150, 50, BUTTON_GREEN, self.confirm_pokemon_selection)
+        self.draw_button(" Back", WIDTH//2 + 60, 550, 150, 50, BUTTON_GRAY, lambda: self.set_state("main_menu"))
 
     def confirm_pokemon_selection(self):
         if self.selected_pokemon_index >= 0:
-            self.game.choisir_pokemon_joueur(self.selected_pokemon_index)
-            self.game.choisir_pokemon_adversaire_aleatoire()
+            self.game.choose_player_pokemon(self.selected_pokemon_index)
+            self.game.choose_random_opponent_pokemon()
             self.set_state("battle")
 
     def battle(self):
         self.screen.fill(BG_COLOR)
-        self.draw_text("⚔️ POKEMON BATTLE ⚔️", FONT_TITLE, TEXT_COLOR, WIDTH//2, 50, center=True)
+        self.draw_text("POKEMON BATTLE", FONT_TITLE, TEXT_COLOR, WIDTH//2, 50, center=True)
         # Player Pokemon
         pygame.draw.rect(self.screen, BUTTON_GREEN, (100, 100, 300, 150))
         self.draw_text("YOUR POKEMON", FONT_BUTTON, TEXT_COLOR, 250, 110)
@@ -123,20 +116,20 @@ class GraphicalInterface:
         self.draw_text(str(self.game.pokemon_adversaire), FONT_SMALL, TEXT_COLOR, 510, 140)
         # Battle Text
         self.draw_scrolled_text(self.battle_history, 50, 300, 800, 250)
-        self.draw_button("⚡ FIGHT!", WIDTH//2 - 100, 580, 200, 50, (243, 156, 18), self.start_battle)
+        self.draw_button("FIGHT!", WIDTH//2 - 100, 580, 200, 50, (243, 156, 18), self.start_battle)
 
     def start_battle(self):
-        battle = self.game.demarrer_combat()
+        battle = self.game.start_battle()
         if battle:
-            self.battle_history = battle.demarrer_combat()
-            message = self.game.enregistrer_pokemon_au_pokedex(self.game.pokemon_adversaire)
+            self.battle_history = battle.start_battle()
+            message = self.game.save_pokemon_to_pokedex(self.game.opponent_pokemon)
             self.battle_history.append(message)
-        self.draw_button("🔄 New Battle", WIDTH//2 - 150, 650, 150, 50, BUTTON_BLUE, lambda: self.set_state("pokemon_selection"))
-        self.draw_button("🏠 Main Menu", WIDTH//2 + 10, 650, 150, 50, BUTTON_GRAY, lambda: self.set_state("main_menu"))
+        self.draw_button("New Battle", WIDTH//2 - 150, 650, 150, 50, BUTTON_BLUE, lambda: self.set_state("pokemon_selection"))
+        self.draw_button("Main Menu", WIDTH//2 + 10, 650, 150, 50, BUTTON_GRAY, lambda: self.set_state("main_menu"))
 
     def add_pokemon(self):
         self.screen.fill(BG_COLOR)
-        self.draw_text("➕ Add Pokemon", FONT_TITLE, TEXT_COLOR, WIDTH//2, 50, center=True)
+        self.draw_text("Add Pokemon", FONT_TITLE, TEXT_COLOR, WIDTH//2, 50, center=True)
         pygame.draw.rect(self.screen, FRAME_COLOR, (100, 100, 700, 500))
         fields = [
             ("Name:", "name", 120),
@@ -160,8 +153,8 @@ class GraphicalInterface:
         # Type2
         self.draw_text("Type 2 (optional):", FONT_NORMAL, TEXT_COLOR, 120, 360)
         self.draw_button(self.form_data["type2"], 300, 360, 200, 30, BUTTON_BLUE, lambda: self.cycle_type("type2"))
-        self.draw_button("✅ Add", WIDTH//2 - 100, 620, 150, 50, BUTTON_GREEN, self.confirm_add_pokemon)
-        self.draw_button("🔙 Back", WIDTH//2 + 60, 620, 150, 50, BUTTON_GRAY, lambda: self.set_state("main_menu"))
+        self.draw_button("Add", WIDTH//2 - 100, 620, 150, 50, BUTTON_GREEN, self.confirm_add_pokemon)
+        self.draw_button("Back", WIDTH//2 + 60, 620, 150, 50, BUTTON_GRAY, lambda: self.set_state("main_menu"))
 
     def cycle_type(self, key):
         types = Type.TYPES if key == "type1" else ["None"] + Type.TYPES
@@ -183,29 +176,29 @@ class GraphicalInterface:
             types = [type1]
             if type2 != "None":
                 types.append(type2)
-            message = self.game.ajouter_pokemon_personnalise(name, types, hp, level, attack, defense)
+            message = self.game.add_custom_pokemon(name, types, hp, level, attack, defense)
             self.set_state("main_menu")
         except ValueError:
             pass  # Error handling
 
     def pokedex(self):
         self.screen.fill(BG_COLOR)
-        self.draw_text("📖 POKEDEX 📖", FONT_TITLE, TEXT_COLOR, WIDTH//2, 50, center=True)
-        self.pokedex_content = self.game.obtenir_pokedex().afficher_pokedex()
+        self.draw_text("POKEDEX", FONT_TITLE, TEXT_COLOR, WIDTH//2, 50, center=True)
+        self.pokedex_content = self.game.get_pokedex().show_pokedex()
         self.draw_scrolled_text(self.pokedex_content, 50, 100, 800, 500)
-        self.draw_button("🔙 Back to Menu", WIDTH//2 - 100, 620, 200, 50, BUTTON_GRAY, lambda: self.set_state("main_menu"))
+        self.draw_button("Back to Menu", WIDTH//2 - 100, 620, 200, 50, BUTTON_GRAY, lambda: self.set_state("main_menu"))
 
     def set_state(self, new_state):
         self.state = new_state
         self.scroll_offset = 0
         if new_state == "pokedex":
-            self.pokedex_content = self.game.obtenir_pokedex().afficher_pokedex()
+            self.pokedex_content = self.game.get_pokedex().show_pokedex()
 
     def run(self):
         while True:
             self.handle_events()
             if self.state == "main_menu":
-                self.main_menu()
+                self.menu.main_menu(self.set_state)
             elif self.state == "pokemon_selection":
                 self.pokemon_selection()
             elif self.state == "battle":
