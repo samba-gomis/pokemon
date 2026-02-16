@@ -1,7 +1,7 @@
 import pygame
 import pygame_textinput
-from Game import Game
-from Type import Type
+from game import Game
+from type import TYPE_DAMAGE
 from constants import *
 
 # Initialize Pygame
@@ -22,7 +22,7 @@ class GraphicalInterface:
         self.current_input_field = None
         self.form_data = {
             "name": "",
-            "type1": Type.TYPES[0],
+           "type1": list(TYPE_DAMAGE.keys())[0],
             "type2": "None",
             "hp": "",
             "level": "",
@@ -95,7 +95,7 @@ class GraphicalInterface:
         pokemons = self.game.obtenir_liste_pokemons()
         items = []
         for i, pokemon in enumerate(pokemons):
-            types_str = "/".join([t.nom for t in pokemon.types])
+            types_str = "/".join(pokemon.type)
             text = f"{i+1}. {pokemon.nom} ({types_str}) - Lv.{pokemon.niveau} - ATK:{pokemon.attaque} DEF:{pokemon.defense}"
             items.append(text)
         self.draw_listbox(items, 50, 100, 800, 400, self.selected_pokemon_index)
@@ -164,7 +164,8 @@ class GraphicalInterface:
         self.draw_button("🔙 Back", WIDTH//2 + 60, 620, 150, 50, BUTTON_GRAY, lambda: self.set_state("main_menu"))
 
     def cycle_type(self, key):
-        types = Type.TYPES if key == "type1" else ["None"] + Type.TYPES
+        types_list = list(TYPE_DAMAGE.keys())
+        types = types_list if key == "type1" else ["None"] + types_list
         current = self.form_data[key]
         index = types.index(current) if current in types else 0
         self.form_data[key] = types[(index + 1) % len(types)]
