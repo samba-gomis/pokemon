@@ -105,5 +105,3 @@ class Game:
             self.combat_log.append(" La fuite a échoué !")
             self.attaquer(self.pokemon_adversaire, self.pokemon_joueur)
             return False
-
-        
