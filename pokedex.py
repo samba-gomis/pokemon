@@ -1,17 +1,23 @@
 import json
 
-#Function to save a Pokemon's data into the JSON file
-def save_to_pokedex(pokemon_obj, captured_status):
-    try:
-        #Try to open and read the existing pokedex data
-        with open("pokedex.json", "r") as f:
-            pokedex=json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        #If file doesn't exist or is empty it start with an empty list
-        pokedex=[]
+class Pokedex:
+    def __init__(self):
+        self.entries=self.load_pokedex()
 
-    #Check if the Pokemon name is not already in the list
-    if not any(p["name"]==pokemon_obj.name for p in pokedex):
+    def display_pokedex(self):
+       for entries in self.entries:
+          print(entries["name"])
+          print(entries["type"])
+          print(entries["hp"])
+          print(entries["attack"])
+          print(entries["defense"])
+          print(entries["captured"])
+             
+    #Function to save a Pokemon's data into the JSON file
+    def save_to_pokedex(self, pokemon_obj, captured_status):
+
+      #Check if the Pokemon name is not already in the list
+      if not any(p["name"]==pokemon_obj.name for p in self.entries):
         #Prepare the data dictionary for the new entry
         new_entry = {
             "name": pokemon_obj.name,
@@ -22,19 +28,19 @@ def save_to_pokedex(pokemon_obj, captured_status):
             "captured": captured_status
         }
         #Add the new entry to our list
-        pokedex.append(new_entry)
+        self.entries.append(new_entry)
         
         #Write the updated list back into the JSON file
         with open("pokedex.json", "w") as f:
-            json.dump(pokedex, f, indent=4)
+            json.dump(self.entries, f, indent=4)
         return True
-    return False #Returns False if the Pokemon was already in the pokedex
+      return False #Returns False if the Pokemon was already in the pokedex
 
-#Function to load and return the full pokedex list
-def load_pokedex():
-    try:
+    #Function to load and return the full pokedex list
+    def load_pokedex(self):
+      try:
         with open("pokedex.json", "r") as f:
             return json.load(f)
-    except (FileNotFoundError,json.JSONDecodeError):
+      except (FileNotFoundError,json.JSONDecodeError):
         #Returns an empty list if there's an error or no file
         return []

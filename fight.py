@@ -1,14 +1,15 @@
 import random
 from pokemon import * #import pokemon class and attributes
 from type import damage_mutliplying #import the function to calculate the multiplier
-from pokedex import * #import save method 
+from pokedex import Pokedex #import save method 
 
 class Fight:
     def __init__(self,pokemon, all_data):
         self.pokemon=pokemon #player pokemon
         random_id=random.choice(list(all_data.keys())) #get random_id for random opponent
         self.opponent=pokemon(random_id,all_data) #create opponant 
-    
+        self.pokedex=Pokedex()
+
     def check_victory(self): 
         if not self.opponent.is_alive():
            print(f"{self.pokemon.name} won! {self.opponent.name} lost!")
@@ -49,5 +50,5 @@ class Fight:
       if self.check_victory(): #if victory, raise xp, use catch chances and save the opponent
             self.pokemon.raise_xp_level(all_data)
             is_captured = self.catch_pokemon()
-            self.save_to_pokedex(self.opponent,is_captured)
+            self.pokedex.save_to_pokedex(self.opponent,is_captured)
     
