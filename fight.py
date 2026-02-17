@@ -13,19 +13,20 @@ class Fight:
         if not self.opponent.is_alive():
            print(f"{self.pokemon.name} won! {self.opponent.name} lost!")
            return True
-        else:
+           
+        elif not self.pokemon.is_alive():
          print(f"{self.opponent.name} managed to win! You lost!")
-         return False
+         return False       
+        return None
     
     def catch_pokemon(self): #manage chances of catching a pokemon after a victory using 50/50
        catching_chances=random.randint(1,100)
-       if self.check_victory:
-          if catching_chances<=50:
-             print("Oh no! This pokemon escaped!")
-             return False
-          elif catching_chances>=50:
-             print("Good Job! You caught this pokemon!")
-             return True
+       if catching_chances<=50:
+          print("Oh no! This pokemon escaped!")
+          return False
+       else:
+          print("Good Job! You caught this pokemon!")
+          return True
 
 
     def attack_power(self,attacker,target): #use random with the possibly of missing an attack if attack<1
@@ -45,10 +46,8 @@ class Fight:
            if self.opponent.is_alive():
                self.attack_power(self.opponent,self.pokemon)
             
-           if self.check_victory(): #if victory, raise xp, use catch chances and save the opponent
-              self.pokemon.raise_xp_level(all_data)
-              is_captured = self.catch_pokemon()
-              self.save_to_pokedex(self.opponent,is_captured)
-              break
-           else: #if lost, exit the loop
-            return 
+      if self.check_victory(): #if victory, raise xp, use catch chances and save the opponent
+            self.pokemon.raise_xp_level(all_data)
+            is_captured = self.catch_pokemon()
+            self.save_to_pokedex(self.opponent,is_captured)
+    
