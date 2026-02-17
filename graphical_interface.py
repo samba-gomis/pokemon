@@ -92,11 +92,11 @@ class GraphicalInterface:
     def pokemon_selection(self):
         self.screen.fill(BG_COLOR)
         self.draw_text("Choose Your Pokemon", FONT_TITLE, TEXT_COLOR, WIDTH//2, 50, center=True)
-        pokemons = self.game.obtenir_liste_pokemons()
+        pokemons = self.game.get_pokemon_list()
         items = []
         for i, pokemon in enumerate(pokemons):
-            types_str = "/".join([t.nom for t in pokemon.types])
-            text = f"{i+1}. {pokemon.nom} ({types_str}) - Lv.{pokemon.niveau} - ATK:{pokemon.attaque} DEF:{pokemon.defense}"
+            types_str = "/".join([t for t in pokemon.get_type()])
+            text = f"{i+1}. {pokemon.name} ({types_str}) - Lv.{pokemon.level} - ATK:{pokemon.get_attack()} DEF:{pokemon.defense}"
             items.append(text)
         self.draw_listbox(items, 50, 100, 800, 400, self.selected_pokemon_index)
         self.draw_button(" Confirm", WIDTH//2 - 100, 550, 150, 50, BUTTON_GREEN, self.confirm_pokemon_selection)
@@ -104,8 +104,8 @@ class GraphicalInterface:
 
     def confirm_pokemon_selection(self):
         if self.selected_pokemon_index >= 0:
-            self.game.choisir_pokemon_joueur(self.selected_pokemon_index)
-            self.game.choisir_pokemon_adversaire_aleatoire()
+            self.game.choose_player_pokemon(self.selected_pokemon_index)
+            self.game.choose_random_opponent_pokemon()
             self.set_state("battle")
 
     def battle(self):
@@ -126,11 +126,10 @@ class GraphicalInterface:
         self.draw_button(" FIGHT!", WIDTH//2 - 100, 580, 200, 50, (243, 156, 18), self.start_battle)
 
     def start_battle(self):
-        battle = self.game.demarrer_combat()
+        battle = self.game.start_battle()
         if battle:
-            self.battle_history = battle.demarrer_combat()
-            message = self.game.enregistrer_pokemon_au_pokedex(self.game.pokemon_adversaire)
-            self.battle_history.append(message)
+            self.battle_history = battle
+            # If you want to add a message for pokedex registration, add here
         self.draw_button(" New Battle", WIDTH//2 - 150, 650, 150, 50, BUTTON_BLUE, lambda: self.set_state("pokemon_selection"))
         self.draw_button(" Main Menu", WIDTH//2 + 10, 650, 150, 50, BUTTON_GRAY, lambda: self.set_state("main_menu"))
 
