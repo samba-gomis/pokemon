@@ -15,7 +15,10 @@ class Game:
 
     #  LOADING DATA
     def load_pokemon_data(self):
-        with open("pokemon.json", "r") as f:
+        import os
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        json_path = os.path.join(base_path, "pokemon.json")
+        with open(json_path, "r") as f:
             return json.load(f)
 
     def create_pokemons(self):
