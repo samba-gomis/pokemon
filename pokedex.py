@@ -23,6 +23,7 @@ def save_to_pokedex(pokemon_obj, captured_status):
         }
         #Add the new entry to our list
         pokedex.append(new_entry)
+        
         #Write the updated list back into the JSON file
         with open("pokedex.json", "w") as f:
             json.dump(pokedex, f, indent=4)

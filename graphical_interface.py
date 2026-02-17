@@ -1,7 +1,7 @@
 import pygame
 import pygame_textinput
 from game import Game
-from type import Type
+from type import TYPE_DAMAGE
 from constants import *
 
 # Initialize Pygame
@@ -22,7 +22,7 @@ class GraphicalInterface:
         self.current_input_field = None
         self.form_data = {
             "name": "",
-            "type1": Type.TYPES[0],
+            "type1": TYPE_DAMAGE[0],
             "type2": "None",
             "hp": "",
             "level": "",
@@ -164,7 +164,7 @@ class GraphicalInterface:
         self.draw_button(" Back", WIDTH//2 + 60, 620, 150, 50, BUTTON_GRAY, lambda: self.set_state("main_menu"))
 
     def cycle_type(self, key):
-        types = Type.TYPES if key == "type1" else ["None"] + Type.TYPES
+        types = TYPE_DAMAGE.TYPES if key == "type1" else ["None"] + TYPE_DAMAGE.TYPES
         current = self.form_data[key]
         index = types.index(current) if current in types else 0
         self.form_data[key] = types[(index + 1) % len(types)]

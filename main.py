@@ -1,4 +1,3 @@
-
 import pygame
 from graphical_interface import GraphicalInterface
 
