@@ -33,7 +33,7 @@ class Pokemon:
     def __str__(self): #Method to debug in case of issues
         display=f"--Pokémon Data--\n"
         display+=f"Name: {self.name}(lv.{self.level}\n)"
-        display+=f"Type: {"/".join(self.get_type())}\n"
+        display+=f"Type: {'/'.join(self.get_type())}\n"
         display+=f"Health: {self.hp}/{self.hp_max}\n"
         display+=f"Stats: ATK:{self.get_attack()}/DEF: {self.defense}\n"
         if self.evolution_id:
