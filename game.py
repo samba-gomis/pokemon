@@ -1,8 +1,8 @@
 import json
 import random
 from pokemon import Pokemon
-from pokedex import save_to_pokedex
-from type import damage_mutliplying
+from pokedex import Pokedex
+#from type import damage_mutliplying
 
 class Game:
     def __init__(self):
@@ -71,7 +71,7 @@ class Game:
 
     def attack(self, attacker, defender):
         attack_type = attacker.get_type()[0]
-        multiplier = damage_mutliplying(attack_type, defender.get_type())
+        multiplier = damage(attack_type, defender.get_type())
 
         damage = int(attacker.get_attack() * multiplier)
         defender.take_damage(damage)
@@ -112,7 +112,7 @@ class Game:
         """
         if pokemon not in self.pokedex:
             self.pokedex.append(pokemon)
-        save_to_pokedex(pokemon, captured)
+        Pokedex(pokemon, captured)
 
     def get_pokedex(self):
         """
