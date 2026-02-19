@@ -43,16 +43,26 @@ class Pokemon:
                 print(f"Warning: Could not load sprite {sprite_path}: {e}")
                 self.sprite = None
         else:
-            self.sprite = None
+         self.__attack=value
 
-    def __str__(self):
-        """String representation of the Pokémon"""
-        display = f"-- Pokemon Data --\n"
-        display += f"Name: {self.name} (Lv.{self.level})\n"
-        display += f"Type: {'/'.join(self.get_type())}\n"
-        display += f"Health: {self.hp}/{self.hp_max}\n"
-        display += f"Stats: ATK:{self.get_attack()} / DEF:{self.defense}\n"
-        
+    def load_attributes(self,file): #Method to avoid repetition and have all pokemon data imported
+        self.name=file["name"]
+        self.__type=file["type"]
+        self.level=file["level"]
+        self.hp=file["hp"]
+        self.hp_max=file["hp"]
+        self.__attack=file["attack"]
+        self.defense=file["defense"]
+        self.evolution_id=file["evolution_id"]
+        self.evolution_level=file["evolution_level"]
+        self.sprite=pygame.image.load(file["sprite"])
+
+    def __str__(self): #Method to debug in case of issues
+        display=f"--Pokémon Data--\n"
+        display+=f"Name: {self.name}(lv.{self.level}\n)"
+        display+=f"Type: {"/".join(self.get_type())}\n"
+        display+=f"Health: {self.hp}/{self.hp_max}\n"
+        display+=f"Stats: ATK:{self.get_attack()}/DEF: {self.defense}\n"
         if self.evolution_id:
             display += f"Evolves at level {self.evolution_level}\n"
         else:
