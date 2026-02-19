@@ -43,7 +43,7 @@ class Pokemon:
                 print(f"Warning: Could not load sprite {sprite_path}: {e}")
                 self.sprite = None
         else:
-         self.__attack=value
+         self.__attack= file["attack"]
 
     def load_attributes(self,file): #Method to avoid repetition and have all pokemon data imported
         self.name=file["name"]
