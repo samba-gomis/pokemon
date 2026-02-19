@@ -1,31 +1,29 @@
 import json
 import random
+import os
 from pokemon import Pokemon
 from pokedex import Pokedex
-#from type import damage_mutliplying
+from type import damage_multiplying, TYPE_DAMAGE
 
 class Game:
     def __init__(self):
-        #  GAME DATA 
+        # GAME DATA
         self.all_data = self.load_pokemon_data()
         self.pokemons = self.create_pokemons()
-        self.pokemon_joueur = None
-        self.pokemon_adversaire = None
+        
+        # RENAMED to match graphical_interface.py
+        self.player_pokemon = None
+        self.opponent_pokemon = None
         self.combat_log = []
 
-        #  POKEDEX 
-        self.pokedex = []
+        # POKEDEX - Single shared instance
+        self.pokedex_manager = Pokedex()
 
-        # New flag to track if the game is running
+        # Flag to track if the game is running
         self.running = True 
         
-    def quit_game(self):
-        """Signals the main loop to stop the game properly."""
-        self.running = False    
-
-    #  LOADING DATA 
+    # LOADING DATA
     def load_pokemon_data(self):
-        import os
         base_path = os.path.dirname(os.path.abspath(__file__))
         json_path = os.path.join(base_path, "pokemon.json")
         with open(json_path, "r") as f:
@@ -34,105 +32,138 @@ class Game:
     def create_pokemons(self):
         return [Pokemon(pid, self.all_data) for pid in self.all_data]
 
-    #  POKEMON SELECTION 
+    # POKEMON SELECTION
     def get_pokemon_list(self):
         return self.pokemons
 
     def choose_player_pokemon(self, index):
-        self.pokemon_joueur = self.pokemons[index]
+        self.player_pokemon = self.pokemons[index]
 
     def choose_random_opponent_pokemon(self):
-        self.pokemon_adversaire = random.choice(self.pokemons)
+        self.opponent_pokemon = random.choice(self.pokemons)
 
-    # POKEMON BATTLE ---
+    # POKEMON BATTLE
     def start_battle(self):
         self.combat_log = []
 
-        if not self.pokemon_joueur or not self.pokemon_adversaire:
+        if not self.player_pokemon or not self.opponent_pokemon:
             self.combat_log.append("Error: Player or opponent Pokémon not selected!")
             return self.combat_log
 
-        while self.pokemon_joueur.is_alive() and self.pokemon_adversaire.is_alive():
+        while self.player_pokemon.is_alive() and self.opponent_pokemon.is_alive():
             self.battle_turn()
 
-        if self.pokemon_joueur.is_alive():
-            self.combat_log.append(f"{self.pokemon_joueur.name} wins!")
-            self.pokemon_joueur.raise_xp_level(self.all_data)
-            self.add_to_pokedex(self.pokemon_adversaire, captured=True)
+        if self.player_pokemon.is_alive():
+            self.combat_log.append(f" {self.player_pokemon.name} wins!")
+            self.player_pokemon.raise_xp_level(self.all_data)
+            self.add_to_pokedex(self.opponent_pokemon, captured=True)
         else:
-            self.combat_log.append(f"{self.pokemon_joueur.name} loses...")
+            self.combat_log.append(f" {self.player_pokemon.name} loses...")
+            self.add_to_pokedex(self.opponent_pokemon, captured=False)
 
         return self.combat_log
 
     def battle_turn(self):
-        self.attack(self.pokemon_joueur, self.pokemon_adversaire)
-        if self.pokemon_adversaire.is_alive():
-            self.attack(self.pokemon_adversaire, self.pokemon_joueur)
+        """One battle turn: the player attacks, then the opponent"""
+        self.attack(self.player_pokemon, self.opponent_pokemon)
+        if self.opponent_pokemon.is_alive():
+            self.attack(self.opponent_pokemon, self.player_pokemon)
 
     def attack(self, attacker, defender):
+        """Performs an attack from one Pokémon to another"""
         attack_type = attacker.get_type()[0]
-        multiplier = damage(attack_type, defender.get_type())
+        
+        # Uses damage_multiplying (keeping the original typo from the file)
+        multiplier = damage_multiplying(attack_type, defender.get_type())
 
-        damage = int(attacker.get_attack() * multiplier)
-        defender.take_damage(damage)
+        # Renamed to avoid shadowing the function name
+        damage_dealt = int(attacker.get_attack() * multiplier)
+        defender.take_damage(damage_dealt)
 
-        message = f"{attacker.name} attacks {defender.name} and deals {damage} damage "
+        # Combat message
+        message = f" {attacker.name} attacks {defender.name} and deals {damage_dealt} damage"
+        
         if multiplier > 1:
-            message += "(Super effective)"
+            message += " (Super effective!)"
         elif multiplier < 1:
-            message += "(Not very effective)"
+            message += " (Not very effective...)"
+        else:
+            message += "!"
 
         self.combat_log.append(message)
 
-    # --- SPECIAL ACTIONS ---
+    # SPECIAL ACTIONS
     def use_potion(self):
-        if self.pokemon_joueur and self.pokemon_joueur.hp > 0:
+        """Uses a potion to heal the player's Pokémon"""
+        if self.player_pokemon and self.player_pokemon.hp > 0:
             heal = 20
-            self.pokemon_joueur.hp = min(self.pokemon_joueur.hp + heal, self.pokemon_joueur.hp_max)
-            self.combat_log.append(f"{self.pokemon_joueur.name} uses a potion (+{heal} HP)")
+            old_hp = self.player_pokemon.hp
+            self.player_pokemon.hp = min(
+                self.player_pokemon.hp + heal, 
+                self.player_pokemon.hp_max
+            )
+            actual_heal = self.player_pokemon.hp - old_hp
+            self.combat_log.append(
+                f" {self.player_pokemon.name} uses a potion (+{actual_heal} HP)"
+            )
 
     def try_to_escape(self):
-        if not self.pokemon_joueur or not self.pokemon_adversaire:
-            self.combat_log.append("Cannot escape, Pokémon not selected!")
+        """Attempts to flee the battle (50% chance)"""
+        if not self.player_pokemon or not self.opponent_pokemon:
+            self.combat_log.append(" Cannot escape, Pokémon not selected!")
             return False
 
         chance = random.random()
         if chance > 0.5:
-            self.combat_log.append("The player managed to escape!")
+            self.combat_log.append(" The player managed to escape!")
             return True
         else:
-            self.combat_log.append("Escape failed!")
-            self.attack(self.pokemon_adversaire, self.pokemon_joueur)
+            self.combat_log.append(" Escape failed!")
+            # The opponent attacks during the escape attempt
+            self.attack(self.opponent_pokemon, self.player_pokemon)
             return False
 
-    # --- POKEDEX MANAGEMENT ---
+    # ADD A CUSTOM POKEMON
+    def add_custom_pokemon(self, name, types, hp, level, attack, defense):
+        """Adds a custom Pokémon to the list"""
+        # Generate a new ID
+        existing_ids = [int(k) for k in self.all_data.keys()]
+        new_id = str(max(existing_ids) + 1) if existing_ids else "1"
+        
+        new_pokemon_data = {
+            "name": name,
+            "type": types,
+            "level": level,
+            "hp": hp,
+            "attack": attack,
+            "defense": defense,
+            "evolution_id": None,
+            "evolution_level": None,
+            "sprite": "assets/images/default.png"  # Default sprite
+        }
+        
+        # Add to data
+        self.all_data[new_id] = new_pokemon_data
+        
+        # Create the Pokemon instance
+        try:
+            new_pokemon = Pokemon(new_id, self.all_data)
+            self.pokemons.append(new_pokemon)
+            return new_pokemon
+        except Exception as e:
+            print(f"Error creating custom Pokemon: {e}")
+            return None
+
+    # POKEDEX MANAGEMENT
     def add_to_pokedex(self, pokemon, captured=False):
-        """
-        Add a Pokemon to the player's Pokedex if captured or after winning a battle.
-        """
-        if pokemon not in self.pokedex:
-            self.pokedex.append(pokemon)
-        Pokedex(pokemon, captured)
+        """Adds a Pokémon to the Pokédex"""
+        self.pokedex_manager.save_to_pokedex(pokemon, captured)
 
     def get_pokedex(self):
-        """
-        Return self to allow chaining .display_pokedex() in the GUI.
-        """
-        return self
+        """Returns the Pokédex manager"""
+        return self.pokedex_manager
 
-    def display_pokedex(self):
-        """
-        Return a list of strings describing each Pokemon in the Pokedex.
-        """
-        if not self.pokedex:
-            return ["Your Pokédex is empty."]
-        return [f"{p.name} - Lv.{p.level} - HP:{p.hp}/{p.hp_max}" for p in self.pokedex]
-
-    # --- CLEAN EXIT ---
+    # CLEAN EXIT
     def quit_game(self):
-        """
-        Optional helper method for GUI: clean up and exit.
-        """
-        import pygame, sys
-        pygame.quit()
-        sys.exit()
+        """Clean up and exit"""
+        self.running = False

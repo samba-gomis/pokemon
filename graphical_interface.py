@@ -3,6 +3,8 @@ import pygame_textinput
 from game import Game
 from type import TYPE_DAMAGE
 from constants import *
+import os
+import sys
 
 # Initialize Pygame
 pygame.init()
@@ -30,7 +32,43 @@ class GraphicalInterface:
             "attack": "",
             "defense": ""
         }
+        self.battle_done = False
+        self.running = True  # Flag to control the main loop
+        
+        # Load background images
+        self.backgrounds = {}
+        self.load_backgrounds()
+        
         self.run()
+
+    def load_backgrounds(self):
+        """Load background images if they exist"""
+        background_files = {
+            "main_menu": "assets/images/menu.png",
+            "pokemon_selection": "assets/images/selection.png",
+            "battle": "assets/images/battle.png",
+            "add_pokemon": "assets/images/add.png",
+            "pokedex": "assets/images/pokedex.png"
+        }
+        
+        for state, filepath in background_files.items():
+            if os.path.exists(filepath):
+                try:
+                    bg = pygame.image.load(filepath)
+                    # Resize image to screen size
+                    bg = pygame.transform.scale(bg, (WIDTH, HEIGHT))
+                    self.backgrounds[state] = bg
+                except:
+                    self.backgrounds[state] = None
+            else:
+                self.backgrounds[state] = None
+
+    def draw_background(self, state):
+        """Display background image if it exists, otherwise fill with color"""
+        if self.backgrounds.get(state):
+            self.screen.blit(self.backgrounds[state], (0, 0))
+        else:
+            self.screen.fill(BG_COLOR)
 
     def draw_text(self, text, font, color, x, y, center=False):
         render = font.render(text, True, color)
@@ -48,6 +86,7 @@ class GraphicalInterface:
         self.draw_text(text, FONT_BUTTON, TEXT_COLOR, x + width // 2, y + height // 2, center=True)
         if rect.collidepoint(mouse) and click[0] == 1:
             if action:
+                pygame.time.delay(200)  # Debounce
                 action()
 
     def draw_listbox(self, items, x, y, width, height, selected_index):
@@ -55,13 +94,12 @@ class GraphicalInterface:
         item_height = 30
         visible_items = height // item_height
         start = max(0, selected_index - visible_items // 2)
+        
+        # Draw items
         for i in range(start, min(len(items), start + visible_items)):
             color = BUTTON_BLUE if i == selected_index else FRAME_COLOR
-            pygame.draw.rect(
-                self.screen,
-                color,
-                (x, y + (i - start) * item_height, width, item_height)
-            )
+            item_rect = pygame.Rect(x, y + (i - start) * item_height, width, item_height)
+            pygame.draw.rect(self.screen, color, item_rect)
             self.draw_text(items[i], FONT_NORMAL, TEXT_COLOR, x + 10, y + (i - start) * item_height + 5)
 
     def draw_scrolled_text(self, lines, x, y, width, height):
@@ -72,21 +110,54 @@ class GraphicalInterface:
         for i in range(start, min(len(lines), start + visible_lines)):
             self.draw_text(lines[i], FONT_COURIER, TEXT_COLOR, x + 10, y + (i - start) * line_height)
 
+    def quit_game(self):
+        """Clean method to quit the game"""
+        self.running = False
+
     def handle_events(self):
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
+                self.quit_game()
+                return
+            
+            # Handle text input fields
             if self.current_input_field:
                 self.text_input.update(events)
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                     self.form_data[self.current_input_field] = self.text_input.value
                     self.current_input_field = None
                     self.text_input = pygame_textinput.TextInputVisualizer(font_object=FONT_NORMAL)
+            
+            # Handle clicks on the Pokémon selection listbox
+            if self.state == "pokemon_selection" and event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_x, mouse_y = event.pos
+                listbox_x, listbox_y = 50, 100
+                listbox_width, listbox_height = 800, 400
+                
+                if listbox_x <= mouse_x <= listbox_x + listbox_width and \
+                   listbox_y <= mouse_y <= listbox_y + listbox_height:
+                    item_height = 30
+                    relative_y = mouse_y - listbox_y
+                    clicked_index = relative_y // item_height
+                    
+                    visible_items = listbox_height // item_height
+                    start = max(0, self.selected_pokemon_index - visible_items // 2)
+                    actual_index = start + clicked_index
+                    
+                    if 0 <= actual_index < len(self.game.get_pokemon_list()):
+                        self.selected_pokemon_index = actual_index
+            
+            # Handle mouse wheel scrolling
+            if event.type == pygame.MOUSEWHEEL:
+                if self.state == "pokedex":
+                    self.scroll_offset = max(
+                        0,
+                        min(self.scroll_offset - event.y, len(self.pokedex_content) - 10)
+                    )
 
     def main_menu(self):
-        self.screen.fill(BG_COLOR)
+        self.draw_background("main_menu")
         self.draw_text("POKEMON GAME", FONT_TITLE, TEXT_COLOR, WIDTH // 2, 50, center=True)
         self.draw_text("Catch them all!", FONT_NORMAL, (149, 165, 166), WIDTH // 2, 100, center=True)
         self.draw_button("Start Game", WIDTH // 2 - 125, 200, 250, 50, BUTTON_GREEN,
@@ -95,10 +166,10 @@ class GraphicalInterface:
                          lambda: self.set_state("add_pokemon"))
         self.draw_button("View Pokedex", WIDTH // 2 - 125, 340, 250, 50, BUTTON_ORANGE,
                          lambda: self.set_state("pokedex"))
-        self.draw_button("Quit", WIDTH // 2 - 125, 410, 250, 50, BUTTON_RED, pygame.quit)
+        self.draw_button("Quit", WIDTH // 2 - 125, 410, 250, 50, BUTTON_RED, self.quit_game)
 
     def pokemon_selection(self):
-        self.screen.fill(BG_COLOR)
+        self.draw_background("pokemon_selection")
         self.draw_text("Choose Your Pokemon", FONT_TITLE, TEXT_COLOR, WIDTH // 2, 50, center=True)
         pokemons = self.game.get_pokemon_list()
         items = []
@@ -109,6 +180,11 @@ class GraphicalInterface:
                 f"- ATK:{pokemon.get_attack()} DEF:{pokemon.defense}"
             )
         self.draw_listbox(items, 50, 100, 800, 400, self.selected_pokemon_index)
+        
+        if self.selected_pokemon_index == -1:
+            self.draw_text("Click on a Pokemon to select it", FONT_SMALL, (255, 200, 0),
+                           WIDTH // 2, 520, center=True)
+        
         self.draw_button("Confirm", WIDTH // 2 - 100, 550, 150, 50, BUTTON_GREEN,
                          self.confirm_pokemon_selection)
         self.draw_button("Back", WIDTH // 2 + 60, 550, 150, 50, BUTTON_GRAY,
@@ -118,33 +194,54 @@ class GraphicalInterface:
         if self.selected_pokemon_index >= 0:
             self.game.choose_player_pokemon(self.selected_pokemon_index)
             self.game.choose_random_opponent_pokemon()
+            self.battle_done = False
+            self.battle_history = []
             self.set_state("battle")
 
     def battle(self):
-        self.screen.fill(BG_COLOR)
+        self.draw_background("battle")
         self.draw_text("POKEMON BATTLE", FONT_TITLE, TEXT_COLOR, WIDTH // 2, 50, center=True)
 
         pygame.draw.rect(self.screen, BUTTON_GREEN, (100, 100, 300, 150))
-        self.draw_text("YOUR POKEMON", FONT_BUTTON, TEXT_COLOR, 250, 110)
-        self.draw_text(str(self.game.player_pokemon), FONT_SMALL, TEXT_COLOR, 110, 140)
+        self.draw_text("YOUR POKEMON", FONT_BUTTON, TEXT_COLOR, 250, 110, center=True)
+        
+        if self.game.player_pokemon:
+            pokemon_info = str(self.game.player_pokemon).split('\n')
+            y_offset = 130
+            for line in pokemon_info[:5]:
+                self.draw_text(line, FONT_SMALL, TEXT_COLOR, 110, y_offset)
+                y_offset += 15
 
         self.draw_text("VS", FONT_TITLE, BUTTON_RED, WIDTH // 2, 175, center=True)
 
         pygame.draw.rect(self.screen, BUTTON_RED, (500, 100, 300, 150))
-        self.draw_text("OPPONENT", FONT_BUTTON, TEXT_COLOR, 650, 110)
-        self.draw_text(str(self.game.opponent_pokemon), FONT_SMALL, TEXT_COLOR, 510, 140)
+        self.draw_text("OPPONENT", FONT_BUTTON, TEXT_COLOR, 650, 110, center=True)
+        
+        if self.game.opponent_pokemon:
+            opponent_info = str(self.game.opponent_pokemon).split('\n')
+            y_offset = 130
+            for line in opponent_info[:5]:
+                self.draw_text(line, FONT_SMALL, TEXT_COLOR, 510, y_offset)
+                y_offset += 15
 
         self.draw_scrolled_text(self.battle_history, 50, 300, 800, 250)
-        self.draw_button("FIGHT!", WIDTH // 2 - 100, 580, 200, 50,
-                         (243, 156, 18), self.start_battle)
+        
+        if not self.battle_done:
+            self.draw_button("FIGHT!", WIDTH // 2 - 100, 580, 200, 50,
+                             (243, 156, 18), self.start_battle)
+        else:
+            self.draw_button("Back to Menu", WIDTH // 2 - 100, 580, 200, 50,
+                             BUTTON_GRAY, lambda: self.set_state("main_menu"))
 
     def start_battle(self):
-        battle_log = self.game.start_battle()
-        if battle_log:
-            self.battle_history = battle_log
+        if not self.battle_done:
+            battle_log = self.game.start_battle()
+            if battle_log:
+                self.battle_history = battle_log
+                self.battle_done = True
 
     def add_pokemon(self):
-        self.screen.fill(BG_COLOR)
+        self.draw_background("add_pokemon")
         self.draw_text("Add Pokemon", FONT_TITLE, TEXT_COLOR, WIDTH // 2, 50, center=True)
         pygame.draw.rect(self.screen, FRAME_COLOR, (100, 100, 700, 500))
 
@@ -181,7 +278,7 @@ class GraphicalInterface:
                          BUTTON_GRAY, lambda: self.set_state("main_menu"))
 
     def cycle_type(self, key):
-        types = TYPE_DAMAGE.TYPES if key == "type1" else ["None"] + TYPE_DAMAGE.TYPES
+        types = list(TYPE_DAMAGE.keys()) if key == "type1" else ["None"] + list(TYPE_DAMAGE.keys())
         current = self.form_data[key]
         index = types.index(current) if current in types else 0
         self.form_data[key] = types[(index + 1) % len(types)]
@@ -210,7 +307,7 @@ class GraphicalInterface:
             pass
 
     def pokedex(self):
-        self.screen.fill(BG_COLOR)
+        self.draw_background("pokedex")
         self.draw_text("POKEDEX", FONT_TITLE, TEXT_COLOR, WIDTH // 2, 50, center=True)
         self.pokedex_content = self.game.get_pokedex().display_pokedex()
         self.draw_scrolled_text(self.pokedex_content, 50, 100, 800, 500)
@@ -220,12 +317,16 @@ class GraphicalInterface:
     def set_state(self, new_state):
         self.state = new_state
         self.scroll_offset = 0
+        self.selected_pokemon_index = -1
         if new_state == "pokedex":
             self.pokedex_content = self.game.get_pokedex().display_pokedex()
 
     def run(self):
-        while True:
+        while self.running:
             self.handle_events()
+            if not self.running:
+                break
+                
             if self.state == "main_menu":
                 self.main_menu()
             elif self.state == "pokemon_selection":
@@ -236,8 +337,12 @@ class GraphicalInterface:
                 self.add_pokemon()
             elif self.state == "pokedex":
                 self.pokedex()
+            
             pygame.display.flip()
             self.clock.tick(FPS)
+        
+        pygame.quit()
+        sys.exit()
 
 if __name__ == "__main__":
     GraphicalInterface()
