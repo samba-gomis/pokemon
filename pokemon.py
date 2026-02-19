@@ -43,19 +43,7 @@ class Pokemon:
                 print(f"Warning: Could not load sprite {sprite_path}: {e}")
                 self.sprite = None
         else:
-         self.__attack= file["attack"]
-
-    def load_attributes(self,file): #Method to avoid repetition and have all pokemon data imported
-        self.name=file["name"]
-        self.__type=file["type"]
-        self.level=file["level"]
-        self.hp=file["hp"]
-        self.hp_max=file["hp"]
-        self.__attack=file["attack"]
-        self.defense=file["defense"]
-        self.evolution_id=file["evolution_id"]
-        self.evolution_level=file["evolution_level"]
-        self.sprite=pygame.image.load(file["sprite"])
+         self.sprite = None
 
     def __str__(self): #Method to debug in case of issues
         display=f"--Pokémon Data--\n"
