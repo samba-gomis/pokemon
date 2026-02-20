@@ -3,13 +3,16 @@ import random
 import os
 from pokemon import Pokemon
 from pokedex import Pokedex
-from type import damage_multiplying, TYPE_DAMAGE
+from fight import Fight
+
 
 class Game:
     def __init__(self):
         # GAME DATA
         self.all_data = self.load_pokemon_data()
         self.pokemons = self.create_pokemons()
+        self.filtered_pokemons=[]
+        self.fight = None
         
         # RENAMED to match graphical_interface.py
         self.player_pokemon = None
@@ -21,6 +24,7 @@ class Game:
 
         # Flag to track if the game is running
         self.running = True 
+
         
     # LOADING DATA
     def load_pokemon_data(self):
@@ -32,65 +36,62 @@ class Game:
     def create_pokemons(self):
         return [Pokemon(pid, self.all_data) for pid in self.all_data]
 
-    # POKEMON SELECTION
-    def get_pokemon_list(self):
-        return self.pokemons
+    # POKEMON SELECTION, FILTER BY POKEMON NO EVOLVED
+    def get_pokemon_list(self):     
+     evolution_ids = set()
+     for pid, data in self.all_data.items():
+        evo_id = data.get("evolution_id")
+        if evo_id:
+            evolution_ids.add(str(evo_id))
+     self.filtered_pokemons = [p for p in self.pokemons if str(p.base_id) not in evolution_ids]
+     return self.filtered_pokemons
 
     def choose_player_pokemon(self, index):
-        self.player_pokemon = self.pokemons[index]
+        self.player_pokemon = self.filtered_pokemons[index]
 
+    #CHO0SE OPPONENT REGARDING PLAYER POKEMON LEVEL
     def choose_random_opponent_pokemon(self):
-        self.opponent_pokemon = random.choice(self.pokemons)
-
+        player_level = self.player_pokemon.level
+        player_atk = self.player_pokemon.get_attack()
+    
+        close_pokemons = [
+         p for p in self.filtered_pokemons
+         if abs(p.level - player_level) <= 3
+         and abs(p.get_attack() - player_atk) <= 20
+         and p != self.player_pokemon
+        ]
+    
+        if close_pokemons:
+         self.opponent_pokemon = random.choice(close_pokemons)
+        else:
+         fallback = [p for p in self.filtered_pokemons
+                    if abs(p.level - player_level) <= 5 and p != self.player_pokemon]
+         self.opponent_pokemon = random.choice(fallback) if fallback else random.choice(self.filtered_pokemons)
     # POKEMON BATTLE
     def start_battle(self):
         self.combat_log = []
-
         if not self.player_pokemon or not self.opponent_pokemon:
-            self.combat_log.append("Error: Player or opponent Pokémon not selected!")
-            return self.combat_log
-
-        while self.player_pokemon.is_alive() and self.opponent_pokemon.is_alive():
-            self.battle_turn()
-
-        if self.player_pokemon.is_alive():
-            self.combat_log.append(f" {self.player_pokemon.name} wins!")
-            self.player_pokemon.raise_xp_level(self.all_data)
-            self.add_to_pokedex(self.opponent_pokemon, captured=True)
-        else:
-            self.combat_log.append(f" {self.player_pokemon.name} loses...")
-            self.add_to_pokedex(self.opponent_pokemon, captured=False)
-
-        return self.combat_log
-
+         return False
+        self.player_pokemon.hp = self.player_pokemon.hp_max
+        self.opponent_pokemon.hp = self.opponent_pokemon.hp_max
+        self.fight = Fight(self.player_pokemon, self.opponent_pokemon, self.all_data)
+        return True
+    
+    #MANAGE TURNS AND DISPLAY MESSAGES
     def battle_turn(self):
-        """One battle turn: the player attacks, then the opponent"""
-        self.attack(self.player_pokemon, self.opponent_pokemon)
+        if not self.fight:
+         return False, []
+        message=[]
+        msg=self.fight.attack_power(self.player_pokemon, self.opponent_pokemon)
+        if msg:
+            message.append(msg)
+
         if self.opponent_pokemon.is_alive():
-            self.attack(self.opponent_pokemon, self.player_pokemon)
+         msg=self.fight.attack_power(self.opponent_pokemon, self.player_pokemon)
+         if msg:
+             message.append(msg)
+        return self.fight.check_victory(),message
 
-    def attack(self, attacker, defender):
-        """Performs an attack from one Pokémon to another"""
-        attack_type = attacker.get_type()[0]
-        
-        # Uses damage_multiplying (keeping the original typo from the file)
-        multiplier = damage_multiplying(attack_type, defender.get_type())
-
-        # Renamed to avoid shadowing the function name
-        damage_dealt = int(attacker.get_attack() * multiplier)
-        defender.take_damage(damage_dealt)
-
-        # Combat message
-        message = f" {attacker.name} attacks {defender.name} and deals {damage_dealt} damage"
-        
-        if multiplier > 1:
-            message += " (Super effective!)"
-        elif multiplier < 1:
-            message += " (Not very effective...)"
-        else:
-            message += "!"
-
-        self.combat_log.append(message)
 
     # SPECIAL ACTIONS
     def use_potion(self):
@@ -120,7 +121,7 @@ class Game:
         else:
             self.combat_log.append(" Escape failed!")
             # The opponent attacks during the escape attempt
-            self.attack(self.opponent_pokemon, self.player_pokemon)
+            self.fight.attack_power(self.opponent_pokemon, self.player_pokemon)
             return False
 
     # ADD A CUSTOM POKEMON
@@ -166,4 +167,5 @@ class Game:
     # CLEAN EXIT
     def quit_game(self):
         """Clean up and exit"""
+        self.pokedex_manager.clear_pokedex()
         self.running = False

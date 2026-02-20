@@ -20,6 +20,7 @@ class GraphicalInterface:
         self.battle_history = []
         self.pokedex_content = []
         self.scroll_offset = 0
+        self.button_clicked = False
         self.text_input = pygame_textinput.TextInputVisualizer(font_object=FONT_NORMAL)
         self.current_input_field = None
         self.type_list = list(TYPE_DAMAGE.keys())
@@ -79,15 +80,12 @@ class GraphicalInterface:
             self.screen.blit(render, (x, y))
 
     def draw_button(self, text, x, y, width, height, color, action=None):
-        mouse = pygame.mouse.get_pos()
-        click = pygame.mouse.get_pressed()
-        rect = pygame.Rect(x, y, width, height)
-        pygame.draw.rect(self.screen, color, rect)
-        self.draw_text(text, FONT_BUTTON, TEXT_COLOR, x + width // 2, y + height // 2, center=True)
-        if rect.collidepoint(mouse) and click[0] == 1:
-            if action:
-                pygame.time.delay(200)  # Debounce
-                action()
+     mouse = pygame.mouse.get_pos()
+     rect = pygame.Rect(x, y, width, height)
+     pygame.draw.rect(self.screen, color, rect)
+     self.draw_text(text, FONT_BUTTON, TEXT_COLOR, x + width // 2, y + height // 2, center=True)
+     if rect.collidepoint(mouse) and action and self.button_clicked:
+        action()
 
     def draw_listbox(self, items, x, y, width, height, selected_index):
         pygame.draw.rect(self.screen, FRAME_COLOR, (x, y, width, height))
@@ -112,9 +110,11 @@ class GraphicalInterface:
 
     def quit_game(self):
         """Clean method to quit the game"""
+        self.game.quit_game()
         self.running = False
 
     def handle_events(self):
+        self.button_clicked = False
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
@@ -128,6 +128,9 @@ class GraphicalInterface:
                     self.form_data[self.current_input_field] = self.text_input.value
                     self.current_input_field = None
                     self.text_input = pygame_textinput.TextInputVisualizer(font_object=FONT_NORMAL)
+            
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+               self.button_clicked = True
             
             # Handle clicks on the Pokémon selection listbox
             if self.state == "pokemon_selection" and event.type == pygame.MOUSEBUTTONDOWN:
@@ -155,6 +158,7 @@ class GraphicalInterface:
                         0,
                         min(self.scroll_offset - event.y, len(self.pokedex_content) - 10)
                     )
+             
 
     def main_menu(self):
         self.draw_background("main_menu")
@@ -194,8 +198,10 @@ class GraphicalInterface:
         if self.selected_pokemon_index >= 0:
             self.game.choose_player_pokemon(self.selected_pokemon_index)
             self.game.choose_random_opponent_pokemon()
+            self.game.fight = None 
             self.battle_done = False
             self.battle_history = []
+            self.game.start_battle()  
             self.set_state("battle")
 
     def battle(self):
@@ -227,18 +233,74 @@ class GraphicalInterface:
         self.draw_scrolled_text(self.battle_history, 50, 300, 800, 250)
         
         if not self.battle_done:
-            self.draw_button("FIGHT!", WIDTH // 2 - 100, 580, 200, 50,
-                             (243, 156, 18), self.start_battle)
+            self.draw_button("FIGHT!", WIDTH // 2 - 230, 580, 140, 50,
+                 (243, 156, 18), self.start_battle)
+            self.draw_button("Potion", WIDTH // 2 - 70, 580, 140, 50,
+                 BUTTON_GREEN, self.use_potion)
+            self.draw_button("Escape", WIDTH // 2 + 90, 580, 140, 50,
+                 BUTTON_RED, self.escape)
         else:
             self.draw_button("Back to Menu", WIDTH // 2 - 100, 580, 200, 50,
                              BUTTON_GRAY, lambda: self.set_state("main_menu"))
+            
+    def use_potion(self):
+     if not self.battle_done and self.game.fight:
+        self.game.use_potion()
+        self.battle_history.append(
+            f"{self.game.player_pokemon.name} used a potion! "
+            f"({self.game.player_pokemon.hp}/{self.game.player_pokemon.hp_max}HP)")
+
+    def escape(self):
+      if not self.battle_done and self.game.fight:
+        escaped = self.game.try_to_escape()
+        if escaped:
+            self.battle_history.append("You escaped!")
+            self.battle_done = True
+        else:
+            self.battle_history.append("Escape failed! Opponent attacks!")
+            self.battle_history.append(
+                f"{self.game.player_pokemon.name}: "
+                f"{self.game.player_pokemon.hp}/{self.game.player_pokemon.hp_max}HP")
+            if not self.game.player_pokemon.is_alive():
+                self.battle_history.append(f"{self.game.player_pokemon.name} fainted!")
+                self.battle_done = True
 
     def start_battle(self):
-        if not self.battle_done:
-            battle_log = self.game.start_battle()
-            if battle_log:
-                self.battle_history = battle_log
-                self.battle_done = True
+      if self.battle_done or not self.game.fight:
+        return
+
+      result,message = self.game.battle_turn()
+
+      for msg in message:
+          self.battle_history.append(msg)
+
+      hp_msg = (f"{self.game.player_pokemon.name}: {self.game.player_pokemon.hp}/{self.game.player_pokemon.hp_max}HP  |  "
+              f"{self.game.opponent_pokemon.name}: {self.game.opponent_pokemon.hp}/{self.game.opponent_pokemon.hp_max}HP")
+      self.battle_history.append(hp_msg)
+
+      if result is True:
+        self.battle_history.append(f">>> {self.game.player_pokemon.name} WINS!")
+        old_xp = self.game.player_pokemon.xp
+        old_level = self.game.player_pokemon.level
+        evo_msg=self.game.player_pokemon.raise_xp_level(self.game.all_data)
+        self.battle_history.append(f"+50 XP! ({self.game.player_pokemon.xp}/100)")
+        if self.game.player_pokemon.level > old_level:
+         self.battle_history.append(f"Level UP! {old_level} → {self.game.player_pokemon.level}")
+        if evo_msg:
+            self.battle_history.append(f">>> {evo_msg}")
+        
+        captured = self.game.fight.catch_pokemon()
+        if captured:
+         self.battle_history.append(f"You caught {self.game.opponent_pokemon.name}!")
+        else:
+         self.battle_history.append(f"{self.game.opponent_pokemon.name} escaped!")
+
+        self.game.add_to_pokedex(self.game.opponent_pokemon, captured)
+        self.battle_done = True
+      elif result is False:
+        self.battle_history.append(f">>> {self.game.player_pokemon.name} loses...")
+        self.game.add_to_pokedex(self.game.opponent_pokemon, False)
+        self.battle_done = True
 
     def add_pokemon(self):
         self.draw_background("add_pokemon")
