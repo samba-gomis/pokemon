@@ -112,5 +112,88 @@
         "attack": 83,
         "defense": 100,
         "captured": false
+    },
+    {
+        "name": "Spearow",
+        "type": [
+            "Normal",
+            "Flying"
+        ],
+        "hp": 40,
+        "attack": 60,
+        "defense": 30,
+        "captured": true
+    },
+    {
+        "name": "Sandshrew",
+        "type": [
+            "Ground"
+        ],
+        "hp": 50,
+        "attack": 75,
+        "defense": 85,
+        "captured": false
+    },
+    {
+        "name": "Raichu",
+        "type": [
+            "Electric"
+        ],
+        "hp": 60,
+        "attack": 90,
+        "defense": 55,
+        "captured": false
+    },
+    {
+        "name": "Weedle",
+        "type": [
+            "Bug",
+            "Poison"
+        ],
+        "hp": 40,
+        "attack": 35,
+        "defense": 30,
+        "captured": true
+    },
+    {
+        "name": "Nidorino",
+        "type": [
+            "Poison"
+        ],
+        "hp": 61,
+        "attack": 72,
+        "defense": 57,
+        "captured": false
+    },
+    {
+        "name": "Butterfree",
+        "type": [
+            "Bug"
+        ],
+        "hp": 60,
+        "attack": 45,
+        "defense": 50,
+        "captured": true
+    },
+    {
+        "name": "Beedrill",
+        "type": [
+            "Bug",
+            "Poison"
+        ],
+        "hp": 65,
+        "attack": 90,
+        "defense": 40,
+        "captured": true
+    },
+    {
+        "name": "Squirtle",
+        "type": [
+            "Water"
+        ],
+        "hp": 44,
+        "attack": 48,
+        "defense": 65,
+        "captured": true
     }
 ]
