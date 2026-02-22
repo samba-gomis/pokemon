@@ -6,13 +6,13 @@ class Pokedex:
 
     # Now returns a list of strings
     def display_pokedex(self):
-        """Returns a list of strings describing each Pokémon in the Pokédex"""
+        """Returns a list of strings describing each Pokemon in the Pokedex"""
         if not self.entries:
             return ["Your Pokedex is empty. Catch some Pokemon to fill it!"]
         
         result = []
         for entry in self.entries:
-            status = "✓ Captured" if entry["captured"] else "✗ Seen only"
+            status = " Captured" if entry["captured"] else " Seen only"
             types = "/".join(entry["type"])
             line = (
                 f"{entry['name']} ({types}) - "
@@ -23,11 +23,11 @@ class Pokedex:
         
         return result
              
-    # Function to save a Pokémon's data into the JSON file
+    # Function to save a Pokemon's data into the JSON file
     def save_to_pokedex(self, pokemon_obj, captured_status):
-        """Saves a Pokémon into the Pokédex JSON file"""
+        """Saves a Pokemon into the Pokedex JSON file"""
         
-        # Check if the Pokémon name is not already in the list
+        # Check if the Pokemon name is not already in the list
         if not any(p["name"] == pokemon_obj.name for p in self.entries):
             # FIXED: Use get_type() instead of .type
             new_entry = {
@@ -51,11 +51,11 @@ class Pokedex:
                 print(f"Error saving to pokedex.json: {e}")
                 return False
         
-        return False  # Returns False if the Pokémon was already in the Pokédex
+        return False  # Returns False if the Pokemon was already in the Pokedex
 
     # Function to load and return the full Pokédex list
     def load_pokedex(self):
-        """Loads the Pokédex from the JSON file"""
+        """Loads the Pokedex from the JSON file"""
         try:
             with open("pokedex.json", "r") as f:
                 content = f.read().strip()

@@ -1,7 +1,7 @@
 import random
-from pokemon import * #import pokemon class and attributes
-from type import damage_multiplying #import the function to calculate the multiplier
-from pokedex import Pokedex #import save method 
+from src.pokemon import *
+from src.type import damage_multiplying
+from src.pokedex import Pokedex 
 
 class Fight:
     def __init__(self,player_pokemon, opponent_pokemon, all_data):
@@ -25,7 +25,6 @@ class Fight:
           return False
        else:
           return True
-
 
     def attack_power(self,attacker,target): #use random with the possibly of missing an attack if attack<1
          attack=random.randint(1,10)
@@ -51,5 +50,3 @@ class Fight:
             return msg
          else:
           return f"{attacker.name} missed!"
-
- 

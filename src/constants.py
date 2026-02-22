@@ -3,11 +3,11 @@ pygame.font.init()
 # Constants
 WIDTH, HEIGHT = 900, 700
 FPS = 60
-FONT_TITLE = pygame.font.SysFont('Arial', 24, bold=True)
-FONT_BUTTON = pygame.font.SysFont('Arial', 14, bold=True)
-FONT_NORMAL = pygame.font.SysFont('Arial', 12)
-FONT_SMALL = pygame.font.SysFont('Arial', 10)
-FONT_COURIER = pygame.font.SysFont('Courier', 10)
+FONT_TITLE = pygame.font.SysFont('LuckiestGuy', 94, bold=True)
+FONT_BUTTON = pygame.font.SysFont('Cinzel', 24, bold=True)
+FONT_NORMAL = pygame.font.SysFont('Cinzel', 22)
+FONT_SMALL = pygame.font.SysFont('Cinzel', 20)
+FONT_COURIER = pygame.font.SysFont('Courier', 20)
 
 # Colors
 BG_COLOR = (44, 62, 80)

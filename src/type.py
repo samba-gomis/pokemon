@@ -1,4 +1,4 @@
-#full dictionnary with the attacker type and the defenter type and their bonus
+#full dictionnary with the attacker type and the defender type and their bonus
 
 TYPE_DAMAGE = {
     "Normal": {

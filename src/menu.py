@@ -1,5 +1,5 @@
 import pygame
-from constants import *
+from src.constants import *
 
 class Menu:
     def __init__(self, screen, draw_text, draw_button):

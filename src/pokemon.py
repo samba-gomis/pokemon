@@ -4,7 +4,7 @@ import os
 # Creation of the Pokemon class
 class Pokemon:
     def __init__(self, pokemon_id, all_data):
-        """Initializes a Pokémon from JSON data"""
+        """Initializes a Pokemon from JSON data"""
         file = all_data[str(pokemon_id)]
         self.id = pokemon_id
         self.base_id = pokemon_id 
@@ -12,7 +12,7 @@ class Pokemon:
         self.load_attributes(file)
 
     def get_type(self):
-        """Getter for the Pokémon type"""
+        """Getter for the Pokemon type"""
         return self.__type
     
     def get_attack(self):
@@ -47,7 +47,7 @@ class Pokemon:
          self.sprite = None
 
     def __str__(self): #Method to debug in case of issues
-        display=f"--Pokémon Data--\n"
+        display=f"--Pokemon Data--\n"
         display+=f"Name: {self.name}(lv.{self.level}\n)"
         display+=f"Type: {'/'.join(self.get_type())}\n"
         display+=f"Health: {self.hp}/{self.hp_max}\n"
@@ -60,11 +60,11 @@ class Pokemon:
         return display
 
     def is_alive(self):
-        """Checks whether the Pokémon is alive"""
+        """Checks whether the Pokemon is alive"""
         return self.hp > 0
     
     def evolve(self, new_data):
-        """Evolves the Pokémon if it reaches the required level"""
+        """Evolves the Pokemon if it reaches the required level"""
         if self.evolution_id and self.level >= self.evolution_level:
             self.id = self.evolution_id
             new_file = new_data[str(self.evolution_id)]
@@ -92,9 +92,7 @@ class Pokemon:
         return evolution_msg
     
     def take_damage(self, damage):
-        """Inflicts damage to the Pokémon (taking defense into account)"""
+        """Inflicts damage to the Pokemon (taking defense into account)"""
         total_damage = max(1, int(damage - self.defense * 0.5))
         # HP cannot drop below 0
         self.hp = max(0, self.hp - total_damage)
-   
-        

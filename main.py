@@ -1,5 +1,5 @@
 import pygame
-from graphical_interface import GraphicalInterface
+from src.graphical_interface import GraphicalInterface
 
 def main():
     pygame.init()

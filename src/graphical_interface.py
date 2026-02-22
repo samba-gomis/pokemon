@@ -1,10 +1,11 @@
 import pygame
 import pygame_textinput
-from game import Game
-from type import TYPE_DAMAGE
-from constants import *
 import os
 import sys
+from src.game import Game
+from src.type import TYPE_DAMAGE
+from src.constants import *
+from src.sounds_manager import SoundManager
 
 # Initialize Pygame
 pygame.init()
@@ -34,7 +35,13 @@ class GraphicalInterface:
             "defense": ""
         }
         self.battle_done = False
-        self.running = True  # Flag to control the main loop
+        self.running = True
+        self.flash_messages = []  
+        self.battle_winner = None
+
+        # Audio
+        self.sound = SoundManager()
+        self.sound.play_menu()
         
         # Load background images
         self.backgrounds = {}
@@ -43,13 +50,13 @@ class GraphicalInterface:
         self.run()
 
     def load_backgrounds(self):
-        """Load background images if they exist"""
+        """Load background images"""
         background_files = {
-            "main_menu": "assets/images/menu.png",
-            "pokemon_selection": "assets/images/selection.png",
-            "battle": "assets/images/battle.png",
-            "add_pokemon": "assets/images/add.png",
-            "pokedex": "assets/images/pokedex.png"
+            "main_menu": "assets/backgrounds/menu.png",
+            "pokemon_selection": "assets/backgrounds/selection.png",
+            "battle": "assets/backgrounds/battle.png",
+            "add_pokemon": "assets/backgrounds/add.png",
+            "pokedex": "assets/backgrounds/pokedex.png"
         }
         
         for state, filepath in background_files.items():
@@ -65,7 +72,7 @@ class GraphicalInterface:
                 self.backgrounds[state] = None
 
     def draw_background(self, state):
-        """Display background image if it exists, otherwise fill with color"""
+        """Display background image"""
         if self.backgrounds.get(state):
             self.screen.blit(self.backgrounds[state], (0, 0))
         else:
@@ -132,7 +139,7 @@ class GraphicalInterface:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                self.button_clicked = True
             
-            # Handle clicks on the Pokémon selection listbox
+            # Handle clicks on the Pokemon selection listbox
             if self.state == "pokemon_selection" and event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_x, mouse_y = event.pos
                 listbox_x, listbox_y = 50, 100
@@ -159,7 +166,6 @@ class GraphicalInterface:
                         min(self.scroll_offset - event.y, len(self.pokedex_content) - 10)
                     )
              
-
     def main_menu(self):
         self.draw_background("main_menu")
         self.draw_text("POKEMON GAME", FONT_TITLE, TEXT_COLOR, WIDTH // 2, 50, center=True)
@@ -198,109 +204,219 @@ class GraphicalInterface:
         if self.selected_pokemon_index >= 0:
             self.game.choose_player_pokemon(self.selected_pokemon_index)
             self.game.choose_random_opponent_pokemon()
-            self.game.fight = None 
+            self.game.fight = None
             self.battle_done = False
             self.battle_history = []
-            self.game.start_battle()  
+            self.flash_messages = []
+            self.battle_winner = None
+            self.game.start_battle()
+            self.sound.play_battle()
             self.set_state("battle")
+
+    def draw_pokemon_sprite(self, pokemon, cx, cy, size=160, flip=False):
+        if pokemon and pokemon.sprite:
+            sprite = pygame.transform.scale(pokemon.sprite, (size, size))
+            if flip:
+                sprite = pygame.transform.flip(sprite, True, False)
+            rect = sprite.get_rect(center=(cx, cy))
+            self.screen.blit(sprite, rect)
+        else:
+            # Placeholder if no sprite
+            box = pygame.Rect(cx - size // 2, cy - size // 2, size, size)
+            pygame.draw.rect(self.screen, FRAME_COLOR, box, border_radius=10)
+            self.draw_text("?", FONT_TITLE, TEXT_COLOR, cx, cy, center=True)
+
+    def draw_hp_bar(self, pokemon, x, y, width=200):
+        """HP bar colored with text"""
+        bar_h = 14
+        ratio = max(0.0, pokemon.hp / pokemon.hp_max)
+        if ratio > 0.5:
+            color = BUTTON_GREEN
+        elif ratio > 0.25:
+            color = BUTTON_ORANGE
+        else:
+            color = BUTTON_RED
+        pygame.draw.rect(self.screen, (40, 40, 40), (x, y, width, bar_h), border_radius=5)
+        if ratio > 0:
+            pygame.draw.rect(self.screen, color, (x, y, int(width * ratio), bar_h), border_radius=5)
+        pygame.draw.rect(self.screen, (200, 200, 200), (x, y, width, bar_h), 1, border_radius=5)
+        self.draw_text(f"HP: {pokemon.hp}/{pokemon.hp_max}", FONT_SMALL, TEXT_COLOR, x, y + bar_h + 3)
+
+    def draw_info_panel(self, pokemon, x, y, width=250, align_right=False):
+        """Panel name / type / HP bar semi-transparent."""
+        s = pygame.Surface((width, 70), pygame.SRCALPHA)
+        s.fill((0, 0, 0, 150))
+        self.screen.blit(s, (x, y))
+        name_x = x + width - 8 if align_right else x + 8
+        self.draw_text(f"{pokemon.name}  Lv.{pokemon.level}", FONT_BUTTON, TEXT_COLOR,
+                       name_x, y + 8, center=align_right)
+        types_str = "/".join(pokemon.get_type())
+        self.draw_text(types_str, FONT_SMALL, (180, 220, 255),
+                       name_x, y + 26, center=align_right)
+        bar_x = x + (width - 200) // 2
+        self.draw_hp_bar(pokemon, bar_x, y + 44, width=200)
+
+    def draw_flash_messages(self):
+        """Show last tour message under sprites"""
+        if not self.flash_messages:
+            return
+        panel_w = 600
+        line_h = 26
+        panel_h = len(self.flash_messages) * line_h + 20
+        px = WIDTH // 2 - panel_w // 2
+        py = 430  # under sprites
+        s = pygame.Surface((panel_w, panel_h), pygame.SRCALPHA)
+        s.fill((0, 0, 0, 190))
+        self.screen.blit(s, (px, py))
+        pygame.draw.rect(self.screen, (255, 220, 0), (px, py, panel_w, panel_h), 2, border_radius=6)
+        for i, (msg, color) in enumerate(self.flash_messages):
+            self.draw_text(msg, FONT_NORMAL, color, WIDTH // 2, py + 10 + i * line_h, center=True)
+
+    def draw_winner_banner(self):
+        if self.battle_winner == "player":
+            text = f"  {self.game.player_pokemon.name} WINS!"
+            color = (255, 215, 0)
+            bg = (30, 100, 30, 210)
+        elif self.battle_winner == "opponent":
+            text = f"  {self.game.player_pokemon.name} fainted..."
+            color = (255, 80, 80)
+            bg = (100, 20, 20, 210)
+        elif self.battle_winner == "escaped":
+            text = "  You escaped!"
+            color = (150, 220, 255)
+            bg = (20, 60, 100, 210)
+        else:
+            return
+
+        bw, bh = 600, 70
+        bx, by = WIDTH // 2 - bw // 2, 440
+        s = pygame.Surface((bw, bh), pygame.SRCALPHA)
+        s.fill(bg)
+        self.screen.blit(s, (bx, by))
+        pygame.draw.rect(self.screen, color, (bx, by, bw, bh), 3, border_radius=10)
+        self.draw_text(text, FONT_TITLE, color, WIDTH // 2, by + bh // 2, center=True)
 
     def battle(self):
         self.draw_background("battle")
-        self.draw_text("POKEMON BATTLE", FONT_TITLE, TEXT_COLOR, WIDTH // 2, 50, center=True)
 
-        pygame.draw.rect(self.screen, BUTTON_GREEN, (100, 100, 300, 150))
-        self.draw_text("YOUR POKEMON", FONT_BUTTON, TEXT_COLOR, 250, 110, center=True)
-        
+        # Title
+        self.draw_text("POKEMON BATTLE", FONT_TITLE, TEXT_COLOR, WIDTH // 2, 22, center=True)
+
+        # Sprites and infos
+        SPRITE_Y = 310
         if self.game.player_pokemon:
-            pokemon_info = str(self.game.player_pokemon).split('\n')
-            y_offset = 130
-            for line in pokemon_info[:5]:
-                self.draw_text(line, FONT_SMALL, TEXT_COLOR, 110, y_offset)
-                y_offset += 15
+            self.draw_pokemon_sprite(self.game.player_pokemon, cx=200, cy=SPRITE_Y,
+                                     size=200, flip=True)
+            self.draw_info_panel(self.game.player_pokemon, x=30, y=55, width=270)
 
-        self.draw_text("VS", FONT_TITLE, BUTTON_RED, WIDTH // 2, 175, center=True)
+        # VS
+        self.draw_text("VS", FONT_TITLE, BUTTON_RED, WIDTH // 2, SPRITE_Y, center=True)
 
-        pygame.draw.rect(self.screen, BUTTON_RED, (500, 100, 300, 150))
-        self.draw_text("OPPONENT", FONT_BUTTON, TEXT_COLOR, 650, 110, center=True)
-        
+        # Opponents sprites
         if self.game.opponent_pokemon:
-            opponent_info = str(self.game.opponent_pokemon).split('\n')
-            y_offset = 130
-            for line in opponent_info[:5]:
-                self.draw_text(line, FONT_SMALL, TEXT_COLOR, 510, y_offset)
-                y_offset += 15
+            self.draw_pokemon_sprite(self.game.opponent_pokemon, cx=700, cy=SPRITE_Y,
+                                     size=200, flip=False)
+            self.draw_info_panel(self.game.opponent_pokemon, x=600, y=55, width=270)
 
-        self.draw_scrolled_text(self.battle_history, 50, 300, 800, 250)
-        
-        if not self.battle_done:
-            self.draw_button("FIGHT!", WIDTH // 2 - 230, 580, 140, 50,
-                 (243, 156, 18), self.start_battle)
-            self.draw_button("Potion", WIDTH // 2 - 70, 580, 140, 50,
-                 BUTTON_GREEN, self.use_potion)
-            self.draw_button("Escape", WIDTH // 2 + 90, 580, 140, 50,
-                 BUTTON_RED, self.escape)
+        # Flash message
+        if self.battle_winner:
+            self.draw_winner_banner()
         else:
-            self.draw_button("Back to Menu", WIDTH // 2 - 100, 580, 200, 50,
+            self.draw_flash_messages()
+
+        # Buttons
+        if not self.battle_done:
+            self.draw_button("FIGHT!", WIDTH // 2 - 230, 620, 140, 50,
+                             (243, 156, 18), self.start_battle)
+            self.draw_button("Potion", WIDTH // 2 - 70, 620, 140, 50,
+                             BUTTON_GREEN, self.use_potion)
+            self.draw_button("Escape", WIDTH // 2 + 90, 620, 140, 50,
+                             BUTTON_RED, self.escape)
+        else:
+            self.draw_button("Back to Menu", WIDTH // 2 - 100, 620, 200, 50,
                              BUTTON_GRAY, lambda: self.set_state("main_menu"))
             
     def use_potion(self):
-     if not self.battle_done and self.game.fight:
-        self.game.use_potion()
-        self.battle_history.append(
-            f"{self.game.player_pokemon.name} used a potion! "
-            f"({self.game.player_pokemon.hp}/{self.game.player_pokemon.hp_max}HP)")
+        if not self.battle_done and self.game.fight:
+            self.game.use_potion()
+            msg = (f"{self.game.player_pokemon.name} used a potion! "
+                   f"({self.game.player_pokemon.hp}/{self.game.player_pokemon.hp_max} HP)")
+            self.battle_history.append(msg)
+            self.flash_messages = [(msg, BUTTON_GREEN)]
 
     def escape(self):
-      if not self.battle_done and self.game.fight:
-        escaped = self.game.try_to_escape()
-        if escaped:
-            self.battle_history.append("You escaped!")
-            self.battle_done = True
-        else:
-            self.battle_history.append("Escape failed! Opponent attacks!")
-            self.battle_history.append(
-                f"{self.game.player_pokemon.name}: "
-                f"{self.game.player_pokemon.hp}/{self.game.player_pokemon.hp_max}HP")
-            if not self.game.player_pokemon.is_alive():
-                self.battle_history.append(f"{self.game.player_pokemon.name} fainted!")
+        if not self.battle_done and self.game.fight:
+            escaped = self.game.try_to_escape()
+            if escaped:
+                self.battle_history.append("You escaped!")
+                self.flash_messages = [("You escaped!", (150, 220, 255))]
+                self.battle_winner = "escaped"
                 self.battle_done = True
+            else:
+                atk_msg = (f"Escape failed! {self.game.opponent_pokemon.name} attacks!")
+                hp_msg = (f"{self.game.player_pokemon.name}: "
+                          f"{self.game.player_pokemon.hp}/{self.game.player_pokemon.hp_max} HP")
+                self.battle_history.append(atk_msg)
+                self.battle_history.append(hp_msg)
+                self.flash_messages = [
+                    ("Escape failed!", BUTTON_RED),
+                    (hp_msg, TEXT_COLOR),
+                ]
+                if not self.game.player_pokemon.is_alive():
+                    self.battle_history.append(f"{self.game.player_pokemon.name} fainted!")
+                    self.flash_messages.append((f"{self.game.player_pokemon.name} fainted!", BUTTON_RED))
+                    self.battle_winner = "opponent"
+                    self.battle_done = True
 
     def start_battle(self):
-      if self.battle_done or not self.game.fight:
-        return
+        if self.battle_done or not self.game.fight:
+            return
 
-      result,message = self.game.battle_turn()
+        result, message = self.game.battle_turn()
 
-      for msg in message:
-          self.battle_history.append(msg)
+        # Build flash message
+        self.flash_messages = []
+        for msg in message:
+            self.battle_history.append(msg)
+            color = (255, 220, 50) if "super effective" in msg.lower() else \
+                    (255, 100, 100) if "no effect" in msg.lower() else \
+                    (200, 200, 200) if "missed" in msg.lower() else TEXT_COLOR
+            self.flash_messages.append((msg, color))
 
-      hp_msg = (f"{self.game.player_pokemon.name}: {self.game.player_pokemon.hp}/{self.game.player_pokemon.hp_max}HP  |  "
-              f"{self.game.opponent_pokemon.name}: {self.game.opponent_pokemon.hp}/{self.game.opponent_pokemon.hp_max}HP")
-      self.battle_history.append(hp_msg)
+        hp_msg = (f"{self.game.player_pokemon.name}: {self.game.player_pokemon.hp}/"
+                  f"{self.game.player_pokemon.hp_max} HP   |   "
+                  f"{self.game.opponent_pokemon.name}: {self.game.opponent_pokemon.hp}/"
+                  f"{self.game.opponent_pokemon.hp_max} HP")
+        self.battle_history.append(hp_msg)
+        self.flash_messages.append((hp_msg, (180, 180, 255)))
 
-      if result is True:
-        self.battle_history.append(f">>> {self.game.player_pokemon.name} WINS!")
-        old_xp = self.game.player_pokemon.xp
-        old_level = self.game.player_pokemon.level
-        evo_msg=self.game.player_pokemon.raise_xp_level(self.game.all_data)
-        self.battle_history.append(f"+50 XP! ({self.game.player_pokemon.xp}/100)")
-        if self.game.player_pokemon.level > old_level:
-         self.battle_history.append(f"Level UP! {old_level} → {self.game.player_pokemon.level}")
-        if evo_msg:
-            self.battle_history.append(f">>> {evo_msg}")
-        
-        captured = self.game.fight.catch_pokemon()
-        if captured:
-         self.battle_history.append(f"You caught {self.game.opponent_pokemon.name}!")
-        else:
-         self.battle_history.append(f"{self.game.opponent_pokemon.name} escaped!")
+        if result is True:
+            old_level = self.game.player_pokemon.level
+            evo_msg = self.game.player_pokemon.raise_xp_level(self.game.all_data)
+            xp_line = f"+50 XP! ({self.game.player_pokemon.xp}/100)"
+            self.battle_history.append(f" {self.game.player_pokemon.name} WINS!")
+            self.battle_history.append(xp_line)
+            if self.game.player_pokemon.level > old_level:
+                lv_line = f"Level UP! {old_level} → {self.game.player_pokemon.level}"
+                self.battle_history.append(lv_line)
+            if evo_msg:
+                self.battle_history.append(f" {evo_msg}")
 
-        self.game.add_to_pokedex(self.game.opponent_pokemon, captured)
-        self.battle_done = True
-      elif result is False:
-        self.battle_history.append(f">>> {self.game.player_pokemon.name} loses...")
-        self.game.add_to_pokedex(self.game.opponent_pokemon, False)
-        self.battle_done = True
+            captured = self.game.fight.catch_pokemon()
+            if captured:
+                self.battle_history.append(f"You caught {self.game.opponent_pokemon.name}!")
+            else:
+                self.battle_history.append(f"{self.game.opponent_pokemon.name} escaped!")
+
+            self.game.add_to_pokedex(self.game.opponent_pokemon, captured)
+            self.battle_winner = "player"
+            self.battle_done = True
+
+        elif result is False:
+            self.battle_history.append(f" {self.game.player_pokemon.name} loses...")
+            self.game.add_to_pokedex(self.game.opponent_pokemon, False)
+            self.battle_winner = "opponent"
+            self.battle_done = True
 
     def add_pokemon(self):
         self.draw_background("add_pokemon")
@@ -377,6 +493,14 @@ class GraphicalInterface:
                          BUTTON_GRAY, lambda: self.set_state("main_menu"))
 
     def set_state(self, new_state):
+        # handle game sounds
+        if new_state == "add_pokemon":
+            self.sound.play_add_sfx()  # one-shot over menu.mp3
+        
+        # back to menu.mp3 if we left battle screen
+        if self.state == "battle" and new_state != "battle":
+            self.sound.stop_battle()
+
         self.state = new_state
         self.scroll_offset = 0
         self.selected_pokemon_index = -1

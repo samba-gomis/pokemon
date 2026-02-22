@@ -1,10 +1,9 @@
 import json
 import random
 import os
-from pokemon import Pokemon
-from pokedex import Pokedex
-from fight import Fight
-
+from src.pokemon import Pokemon
+from src.pokedex import Pokedex
+from src.fight import Fight
 
 class Game:
     def __init__(self):
@@ -49,7 +48,7 @@ class Game:
     def choose_player_pokemon(self, index):
         self.player_pokemon = self.filtered_pokemons[index]
 
-    #CHO0SE OPPONENT REGARDING PLAYER POKEMON LEVEL
+    #CHOOSE OPPONENT REGARDING PLAYER POKEMON LEVEL
     def choose_random_opponent_pokemon(self):
         player_level = self.player_pokemon.level
         player_atk = self.player_pokemon.get_attack()
@@ -92,10 +91,9 @@ class Game:
              message.append(msg)
         return self.fight.check_victory(),message
 
-
     # SPECIAL ACTIONS
     def use_potion(self):
-        """Uses a potion to heal the player's Pokémon"""
+        """Uses a potion to heal the player's Pokemon"""
         if self.player_pokemon and self.player_pokemon.hp > 0:
             heal = 20
             old_hp = self.player_pokemon.hp
@@ -111,7 +109,7 @@ class Game:
     def try_to_escape(self):
         """Attempts to flee the battle (50% chance)"""
         if not self.player_pokemon or not self.opponent_pokemon:
-            self.combat_log.append(" Cannot escape, Pokémon not selected!")
+            self.combat_log.append(" Cannot escape, Pokemon not selected!")
             return False
 
         chance = random.random()
@@ -126,7 +124,7 @@ class Game:
 
     # ADD A CUSTOM POKEMON
     def add_custom_pokemon(self, name, types, hp, level, attack, defense):
-        """Adds a custom Pokémon to the list"""
+        """Adds a custom Pokemon to the list"""
         # Generate a new ID
         existing_ids = [int(k) for k in self.all_data.keys()]
         new_id = str(max(existing_ids) + 1) if existing_ids else "1"
@@ -140,7 +138,7 @@ class Game:
             "defense": defense,
             "evolution_id": None,
             "evolution_level": None,
-            "sprite": "assets/images/default.png"  # Default sprite
+            "sprite": "assets/images/default.png"
         }
         
         # Add to data
@@ -157,11 +155,11 @@ class Game:
 
     # POKEDEX MANAGEMENT
     def add_to_pokedex(self, pokemon, captured=False):
-        """Adds a Pokémon to the Pokédex"""
+        """Adds a Pokemon to the Pokedex"""
         self.pokedex_manager.save_to_pokedex(pokemon, captured)
 
     def get_pokedex(self):
-        """Returns the Pokédex manager"""
+        """Returns the Pokedex manager"""
         return self.pokedex_manager
 
     # CLEAN EXIT
