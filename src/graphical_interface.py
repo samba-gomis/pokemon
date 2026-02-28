@@ -130,7 +130,7 @@ class GraphicalInterface:
             
             # Handle text input fields
             if self.current_input_field:
-                self.text_input.update(events)
+                self.text_input.update([event])  # ✅ Ne passer QUE cet event, pas tous
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                     self.form_data[self.current_input_field] = self.text_input.value
                     self.current_input_field = None
@@ -432,15 +432,16 @@ class GraphicalInterface:
         ]
 
         for label, key, y in fields:
-            self.draw_text(label, FONT_NORMAL, TEXT_COLOR, 120, y)
-            if self.current_input_field == key:
-                self.screen.blit(self.text_input.surface, (300, y))
-            else:
-                self.draw_text(self.form_data[key], FONT_NORMAL, TEXT_COLOR, 300, y)
-                if pygame.Rect(300, y, 400, 30).collidepoint(pygame.mouse.get_pos()) \
-                        and pygame.mouse.get_pressed()[0]:
-                    self.current_input_field = key
-                    self.text_input.value = self.form_data[key]
+         self.draw_text(label, FONT_NORMAL, TEXT_COLOR, 120, y)
+         if self.current_input_field == key:
+          self.screen.blit(self.text_input.surface, (300, y))
+         else:
+          self.draw_text(self.form_data[key], FONT_NORMAL, TEXT_COLOR, 300, y)
+          input_rect = pygame.Rect(300, y, 400, 30)
+          if input_rect.collidepoint(pygame.mouse.get_pos()) and self.button_clicked:
+            self.current_input_field = key
+            self.text_input.value = self.form_data[key]
+            self.button_clicked = False  
 
         self.draw_text("Type 1:", FONT_NORMAL, TEXT_COLOR, 120, 160)
         self.draw_button(self.form_data["type1"], 300, 160, 200, 30,
