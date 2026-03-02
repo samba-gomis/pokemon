@@ -130,7 +130,7 @@ class GraphicalInterface:
             
             # Handle text input fields
             if self.current_input_field:
-                self.text_input.update([event])  # ✅ Ne passer QUE cet event, pas tous
+                self.text_input.update([event])  # Only pass this event, not all
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                     self.form_data[self.current_input_field] = self.text_input.value
                     self.current_input_field = None
