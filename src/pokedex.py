@@ -73,8 +73,3 @@ class Pokedex:
             with open("pokedex.json", "w") as f:
                 json.dump([], f)
             return []
-        
-    def clear_pokedex(self):
-     self.entries = []
-     with open("pokedex.json", "w") as f:
-        json.dump([], f)

@@ -23,7 +23,6 @@ class Game:
 
         # Flag to track if the game is running
         self.running = True 
-
         
     # LOADING DATA
     def load_pokemon_data(self):
@@ -129,6 +128,10 @@ class Game:
         existing_ids = [int(k) for k in self.all_data.keys()]
         new_id = str(max(existing_ids) + 1) if existing_ids else "1"
         
+        # Resolve json path
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        json_path = os.path.join(base_path, "pokemon.json")
+
         new_pokemon_data = {
             "name": name,
             "type": types,
@@ -143,6 +146,13 @@ class Game:
         
         # Add to data
         self.all_data[new_id] = new_pokemon_data
+
+         # Save to pokemon.json
+        try:
+            with open(json_path, "w") as f:
+                json.dump(self.all_data, f, indent=2)
+        except Exception as e:
+            print(f"Error saving pokemon.json: {e}")
         
         # Create the Pokemon instance
         try:
@@ -165,5 +175,4 @@ class Game:
     # CLEAN EXIT
     def quit_game(self):
         """Clean up and exit"""
-        self.pokedex_manager.clear_pokedex()
         self.running = False

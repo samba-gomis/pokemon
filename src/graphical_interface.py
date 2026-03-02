@@ -3,6 +3,7 @@ import pygame_textinput
 import os
 import sys
 from src.game import Game
+from src.menu import Menu
 from src.type import TYPE_DAMAGE
 from src.constants import *
 from src.sounds_manager import SoundManager
@@ -38,7 +39,8 @@ class GraphicalInterface:
         self.running = True
         self.flash_messages = []  
         self.battle_winner = None
-
+        self.menu = Menu(self.screen, self.draw_text, self.draw_button, self.draw_background)
+        
         # Audio
         self.sound = SoundManager()
         self.sound.play_menu()
@@ -130,7 +132,7 @@ class GraphicalInterface:
             
             # Handle text input fields
             if self.current_input_field:
-                self.text_input.update([event])  # Only pass this event, not all
+                self.text_input.update([event])
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                     self.form_data[self.current_input_field] = self.text_input.value
                     self.current_input_field = None
@@ -167,16 +169,7 @@ class GraphicalInterface:
                     )
              
     def main_menu(self):
-        self.draw_background("main_menu")
-        self.draw_text("POKEMON GAME", FONT_TITLE, TEXT_COLOR, WIDTH // 2, 50, center=True)
-        self.draw_text("Catch them all!", FONT_NORMAL, (149, 165, 166), WIDTH // 2, 100, center=True)
-        self.draw_button("Start Game", WIDTH // 2 - 125, 200, 250, 50, BUTTON_GREEN,
-                         lambda: self.set_state("pokemon_selection"))
-        self.draw_button("Add Pokemon", WIDTH // 2 - 125, 270, 250, 50, BUTTON_BLUE,
-                         lambda: self.set_state("add_pokemon"))
-        self.draw_button("View Pokedex", WIDTH // 2 - 125, 340, 250, 50, BUTTON_ORANGE,
-                         lambda: self.set_state("pokedex"))
-        self.draw_button("Quit", WIDTH // 2 - 125, 410, 250, 50, BUTTON_RED, self.quit_game)
+        self.menu.main_menu(self.set_state, self.quit_game)
 
     def pokemon_selection(self):
         self.draw_background("pokemon_selection")
